@@ -8,6 +8,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/////////////////////////////////////////////////
+// ENUMS
+/////////////////////////////////////////////////
+
 enum UserRole {
   SUPER_ADMIN
   ADMIN
@@ -20,44 +24,91 @@ enum StoreStatus {
   INACTIVE
 }
 
-model User {
-  id          String      @id @default(cuid())
-  name        String
-  email       String      @unique
-  password    String
-  role        UserRole    @default(ADMIN)
-
-  merchantId  String?
-  merchant    Merchant?   @relation(fields: [merchantId], references: [id])
-
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
 }
+
+enum InventoryMovementType {
+  PURCHASE
+  SALE
+  ADJUSTMENT
+  RETURN
+}
+
+enum PurchaseStatus {
+  PENDING
+  RECEIVED
+  CANCELLED
+}
+
+enum SaleStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK_TRANSFER
+  MOBILE_MONEY
+  OTHER
+}
+
+/////////////////////////////////////////////////
+// USERS
+/////////////////////////////////////////////////
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  password     String
+  role         UserRole  @default(CASHIER)
+
+  merchantId   String
+  merchant     Merchant  @relation(fields: [merchantId], references: [id])
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+/////////////////////////////////////////////////
+// MERCHANTS
+/////////////////////////////////////////////////
 
 model Merchant {
-  id          String      @id @default(cuid())
-  businessName String
-  email       String      @unique
-  phone       String?
+  id            String      @id @default(cuid())
+  businessName  String
+  email         String      @unique
+  phone         String?
+  address       String?
 
-  users       User[]
-  stores      Store[]
+  users         User[]
+  stores        Store[]
 
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
 
+/////////////////////////////////////////////////
+// STORES
+/////////////////////////////////////////////////
+
 model Store {
-  id          String       @id @default(cuid())
-  name        String
-  address     String?
-  phone       String?
+  id            String       @id @default(cuid())
 
-  status      StoreStatus  @default(ACTIVE)
+  name          String
+  phone         String?
+  address       String?
 
-  merchantId  String
-  merchant    Merchant     @relation(fields: [merchantId], references: [id])
+  status        StoreStatus  @default(ACTIVE)
 
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  merchantId    String
+  merchant      Merchant     @relation(fields: [merchantId], references: [id])
+
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 }
