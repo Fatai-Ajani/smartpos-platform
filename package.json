@@ -1,1 +1,20 @@
-
+{
+  "name": "smartpos-platform",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "backend",
+    "shared",
+    "gateway",
+    "wallet",
+    "dashboard"
+  ],
+  "scripts": {
+    "dev": "npm --workspace backend run dev",
+    "build": "npm --workspace backend run build",
+    "start": "npm --workspace backend run start",
+    "typecheck": "npm --workspace backend run typecheck",
+    "lint": "npm --workspace backend run lint",
+    "format": "npm --workspace backend run format"
+  }
+}
