@@ -1,10 +1,10 @@
-```typescript
 import Fastify, { FastifyInstance } from "fastify";
 
 import prismaPlugin from "./plugins/prisma";
 import authPlugin from "./plugins/auth";
 
 import healthRoutes from "./routes/health";
+import authRoutes from "./routes/auth";
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -28,7 +28,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   }));
 
   await app.register(healthRoutes);
+  await app.register(authRoutes);
 
   return app;
 }
-```
