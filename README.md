@@ -1,51 +1,34 @@
 # SmartPOS Platform
 
-A modern, scalable Point of Sale (POS) platform built with a modular architecture to support retail stores, restaurants, supermarkets, pharmacies, wholesalers, and multi-branch businesses.
+SmartPOS Platform is a cloud-native payment infrastructure that enables merchants to accept traditional card payments and settle funds into cryptocurrency wallets.
 
-The SmartPOS Platform is designed as a complete business management ecosystem, providing inventory management, sales processing, customer management, financial reporting, payment integration, and centralized administration through secure APIs and dedicated applications.
+Unlike traditional POS systems that focus on inventory management, SmartPOS focuses on payment processing, merchant onboarding, secure transaction management, crypto settlement, and financial infrastructure.
 
-## Project Structure
+---
 
-```
-smartpos-platform/
-├── backend/          # REST API and business logic
-├── dashboard/        # Web administration dashboard
-├── wallet/           # Customer wallet services
-├── gateway/          # Payment gateway integrations
-├── printer/          # Receipt printing service
-├── shared/           # Shared types and utilities
-├── database/         # Database resources and backups
-├── android/          # Android POS application
-└── docs/             # Documentation
-```
+## Core Features
 
-## Planned Features
-
+* Merchant Management
 * User Authentication
-* Role Based Access Control
-* Multi Merchant Support
-* Multi Store Support
-* Inventory Management
-* Product Management
-* Category Management
-* Customer Management
-* Supplier Management
-* Purchase Management
-* Sales Processing
-* Returns and Refunds
-* Expense Tracking
-* Payment Processing
-* Receipt Printing
-* Barcode Scanning
-* QR Code Payments
-* Reports and Analytics
-* Dashboard Metrics
-* Notifications
+* Role-Based Access Control
+* POS Terminal Registration
+* Card Payment Processing
+* Crypto Wallet Management
+* Fiat-to-Crypto Settlement
+* Blockchain Transaction Tracking
+* Exchange Rate Service
+* Settlement Engine
+* KYC Verification
+* API Key Management
+* Webhooks
 * Audit Logs
-* Wallet System
-* Offline Synchronization
-* REST API
+* Notifications
+* Dashboard APIs
 * Docker Support
+* REST API
+* OpenAPI Documentation
+
+---
 
 ## Technology Stack
 
@@ -56,8 +39,8 @@ smartpos-platform/
 * Fastify
 * Prisma ORM
 * PostgreSQL
-* JWT Authentication
-* Zod Validation
+* JWT
+* Zod
 
 ### Infrastructure
 
@@ -65,17 +48,55 @@ smartpos-platform/
 * Docker Compose
 * GitHub Actions
 
-### Frontend
+### Future Services
 
-* React
-* TypeScript
+* Dashboard
+* Android POS
+* Wallet Service
+* Payment Gateway
+* Receipt Printer Service
+
+---
+
+## Project Structure
+
+```text
+smartpos-platform/
+
+backend/
+database/
+dashboard/
+wallet/
+gateway/
+printer/
+shared/
+android/
+docs/
+scripts/
+```
+
+---
+
+## Development Principles
+
+* API First
+* Modular Architecture
+* Secure by Default
+* Multi-Merchant
+* Blockchain Ready
+* Cloud Native
+* Horizontally Scalable
+
+---
 
 ## Development Status
 
-The project is currently under active development.
+Backend development is the current priority.
 
-The backend is being developed first, followed by the dashboard, Android application, payment gateway, wallet service, and printer service.
+The backend will be completed before implementing the dashboard, Android POS application, wallet service, payment gateway, and printer service.
+
+---
 
 ## License
 
-This project is intended for private development until an official release is published.
+Private project.
