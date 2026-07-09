@@ -2,6 +2,7 @@
 import Fastify, { FastifyInstance } from "fastify";
 
 import prismaPlugin from "./plugins/prisma";
+import authPlugin from "./plugins/auth";
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -16,14 +17,13 @@ export async function buildApp(): Promise<FastifyInstance> {
   });
 
   await app.register(prismaPlugin);
+  await app.register(authPlugin);
 
-  app.get("/", async () => {
-    return {
-      name: "SmartPOS API",
-      version: "1.0.0",
-      status: "running"
-    };
-  });
+  app.get("/", async () => ({
+    name: "SmartPOS API",
+    version: "1.0.0",
+    status: "running"
+  }));
 
   app.get("/api/v1/health", async () => {
     await app.prisma.$queryRaw`SELECT 1`;
