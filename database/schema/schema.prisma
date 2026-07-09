@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../backend/node_modules/@prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  CASHIER
+}
+
+enum StoreStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model User {
+  id          String      @id @default(cuid())
+  name        String
+  email       String      @unique
+  password    String
+  role        UserRole    @default(ADMIN)
+
+  merchantId  String?
+  merchant    Merchant?   @relation(fields: [merchantId], references: [id])
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Merchant {
+  id          String      @id @default(cuid())
+  businessName String
+  email       String      @unique
+  phone       String?
+
+  users       User[]
+  stores      Store[]
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Store {
+  id          String       @id @default(cuid())
+  name        String
+  address     String?
+  phone       String?
+
+  status      StoreStatus  @default(ACTIVE)
+
+  merchantId  String
+  merchant    Merchant     @relation(fields: [merchantId], references: [id])
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
