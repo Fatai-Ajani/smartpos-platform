@@ -16,7 +16,7 @@ export default class StripeProvider extends BaseProvider {
 
   readonly name = "stripe";
 
-  private stripe: Stripe;
+  private readonly stripe: Stripe;
 
   constructor(
 
@@ -32,8 +32,7 @@ export default class StripeProvider extends BaseProvider {
 
       {
 
-        apiVersion:
-          "2025-06-30.basil"
+        apiVersion: "2025-06-30.basil"
 
       }
 
@@ -47,11 +46,57 @@ export default class StripeProvider extends BaseProvider {
 
   ): Promise<ProviderResponse> {
 
-    throw new Error(
+    const intent =
 
-      "Not implemented."
+      await this.stripe.paymentIntents.create({
 
-    );
+        amount: Math.round(
+
+          input.amount * 100
+
+        ),
+
+        currency:
+
+          input.currency.toLowerCase(),
+
+        description:
+
+          input.description,
+
+        metadata: {
+
+          reference:
+
+            input.reference,
+
+          ...(input.metadata ?? {})
+
+        }
+
+      });
+
+    return {
+
+      success: true,
+
+      message:
+
+        "Payment Intent created.",
+
+      reference:
+
+        input.reference,
+
+      transactionId:
+
+        intent.id,
+
+      raw:
+
+        intent
+
+    };
 
   }
 
@@ -61,11 +106,35 @@ export default class StripeProvider extends BaseProvider {
 
   ): Promise<ProviderResponse> {
 
-    throw new Error(
+    const paymentIntent =
 
-      "Not implemented."
+      await this.stripe.paymentIntents.retrieve(
 
-    );
+        input.transactionId
+
+      );
+
+    return {
+
+      success:
+
+        paymentIntent.status ===
+
+        "succeeded",
+
+      message:
+
+        paymentIntent.status,
+
+      transactionId:
+
+        paymentIntent.id,
+
+      raw:
+
+        paymentIntent
+
+    };
 
   }
 
@@ -75,11 +144,45 @@ export default class StripeProvider extends BaseProvider {
 
   ): Promise<ProviderResponse> {
 
-    throw new Error(
+    const refund =
 
-      "Not implemented."
+      await this.stripe.refunds.create({
 
-    );
+        payment_intent:
+
+          input.transactionId,
+
+        amount:
+
+          input.amount
+
+            ? Math.round(
+
+                input.amount * 100
+
+              )
+
+            : undefined
+
+      });
+
+    return {
+
+      success: true,
+
+      message:
+
+        "Refund created.",
+
+      transactionId:
+
+        refund.id,
+
+      raw:
+
+        refund
+
+    };
 
   }
 
@@ -91,11 +194,27 @@ export default class StripeProvider extends BaseProvider {
 
   ): Promise<boolean> {
 
-    throw new Error(
+    try {
 
-      "Not implemented."
+      this.stripe.webhooks.constructEvent(
 
-    );
+        payload,
+
+        signature,
+
+        process.env
+
+          .STRIPE_WEBHOOK_SECRET!
+
+      );
+
+      return true;
+
+    } catch {
+
+      return false;
+
+    }
 
   }
 
