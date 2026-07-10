@@ -1,31 +1,51 @@
-import fp from 'fastify-plugin';
-import { FastifyInstance } from 'fastify';
-import fastifyJwt from '@fastify/jwt';
+import fp from "fastify-plugin";
 
-import { env } from '../config/env';
+import fastifyJwt from "@fastify/jwt";
 
-export const registerJwt = fp(async (app: FastifyInstance) => {
-  await app.register(fastifyJwt, {
-    secret: env.JWT_SECRET,
-    sign: {
-      expiresIn: env.JWT_EXPIRES_IN
-    }
-  });
+declare module "@fastify/jwt" {
 
-  app.decorate(
-    'authenticate',
-    async function (request: any, reply: any) {
-      try {
-        await request.jwtVerify();
-      } catch (error) {
-        return reply.send(error);
-      }
-    }
-  );
-});
+  interface FastifyJWT {
 
-declare module 'fastify' {
-  interface FastifyInstance {
-    authenticate(request: any, reply: any): Promise<void>;
+    payload: {
+
+      id: string;
+
+      email: string;
+
+      role: string;
+
+    };
+
+    user: {
+
+      id: string;
+
+      email: string;
+
+      role: string;
+
+    };
+
   }
+
 }
+
+export default fp(async (app) => {
+
+  await app.register(
+
+    fastifyJwt,
+
+    {
+
+      secret:
+
+        process.env.JWT_SECRET ||
+
+        "CHANGE_THIS_SECRET"
+
+    }
+
+  );
+
+});
