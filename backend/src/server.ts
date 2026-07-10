@@ -1,19 +1,46 @@
-import app from "./app.js";
+import buildApp from "./app";
 
-const start = async () => {
+async function start() {
+
+  const app =
+    await buildApp();
+
+  const PORT =
+
+    Number(
+      process.env.PORT
+    ) || 3000;
+
+  const HOST =
+
+    process.env.HOST ||
+
+    "0.0.0.0";
+
   try {
+
     await app.listen({
-      host: process.env.HOST || "0.0.0.0",
-      port: Number(process.env.PORT) || 4000
+
+      port: PORT,
+
+      host: HOST
+
     });
 
-    app.log.info("======================================");
-    app.log.info(" SmartPOS Backend Started Successfully ");
-    app.log.info("======================================");
+    app.log.info(
+
+      `SmartPOS API running on ${HOST}:${PORT}`
+
+    );
+
   } catch (error) {
+
     app.log.error(error);
+
     process.exit(1);
+
   }
-};
+
+}
 
 start();
