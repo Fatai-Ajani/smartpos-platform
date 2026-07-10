@@ -1,28 +1,43 @@
 import fp from "fastify-plugin";
+
 import Redis from "ioredis";
-import { FastifyInstance } from "fastify";
 
-const redis = new Redis({
-  host: process.env.REDIS_HOST,
-  port: Number(process.env.REDIS_PORT),
-  password: process.env.REDIS_PASSWORD || undefined,
-  lazyConnect: true
-});
+import env from "../config/env";
 
-declare module "fastify" {
-  interface FastifyInstance {
-    redis: Redis;
-  }
-}
+export default fp(async (app) => {
 
-export default fp(async function (app: FastifyInstance) {
+  const redis = new Redis(
 
-  await redis.connect();
+    env.REDIS_URL,
 
-  app.decorate("redis", redis);
+    {
 
-  app.addHook("onClose", async () => {
-    await redis.quit();
-  });
+      maxRetriesPerRequest: null,
+
+      enableReadyCheck: false
+
+    }
+
+  );
+
+  app.decorate(
+
+    "redis",
+
+    redis
+
+  );
+
+  app.addHook(
+
+    "onClose",
+
+    async () => {
+
+      await redis.quit();
+
+    }
+
+  );
 
 });
