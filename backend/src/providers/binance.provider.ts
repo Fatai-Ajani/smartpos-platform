@@ -1,4 +1,10 @@
-import axios from "axios";
+import axios, {
+
+  AxiosInstance
+
+} from "axios";
+
+import crypto from "crypto";
 
 import BaseProvider, {
 
@@ -16,6 +22,8 @@ export default class BinanceProvider extends BaseProvider {
 
   readonly name = "binance";
 
+  private readonly client: AxiosInstance;
+
   constructor(
 
     private readonly apiKey: string,
@@ -26,6 +34,44 @@ export default class BinanceProvider extends BaseProvider {
 
     super();
 
+    this.client = axios.create({
+
+      baseURL:
+
+        "https://bpay.binanceapi.com",
+
+      headers: {
+
+        "Content-Type":
+
+          "application/json"
+
+      }
+
+    );
+
+  }
+
+  private sign(
+
+    payload: string
+
+  ) {
+
+    return crypto
+
+      .createHmac(
+
+        "sha512",
+
+        this.secretKey
+
+      )
+
+      .update(payload)
+
+      .digest("hex");
+
   }
 
   async createPayment(
@@ -34,11 +80,119 @@ export default class BinanceProvider extends BaseProvider {
 
   ): Promise<ProviderResponse> {
 
-    throw new Error(
+    const payload = {
 
-      "Not implemented."
+      merchantTradeNo:
 
-    );
+        input.reference,
+
+      orderAmount:
+
+        input.amount,
+
+      currency:
+
+        input.currency,
+
+      goods: {
+
+        goodsType:
+
+          "01",
+
+        goodsCategory:
+
+          "D000",
+
+        referenceGoodsId:
+
+          input.reference,
+
+        goodsName:
+
+          input.description ||
+
+          "Payment"
+
+      }
+
+    };
+
+    const timestamp =
+
+      Date.now();
+
+    const nonce =
+
+      crypto.randomUUID();
+
+    const signature =
+
+      this.sign(
+
+        `${timestamp}\n${nonce}\n${JSON.stringify(payload)}\n`
+
+      );
+
+    const response =
+
+      await this.client.post(
+
+        "/binancepay/openapi/v2/order",
+
+        payload,
+
+        {
+
+          headers: {
+
+            "BinancePay-Timestamp":
+
+              timestamp,
+
+            "BinancePay-Nonce":
+
+              nonce,
+
+            "BinancePay-Certificate-SN":
+
+              this.apiKey,
+
+            "BinancePay-Signature":
+
+              signature
+
+          }
+
+        }
+
+      );
+
+    return {
+
+      success:
+
+        response.data.status ===
+
+        "SUCCESS",
+
+      message:
+
+        response.data.code,
+
+      reference:
+
+        input.reference,
+
+      transactionId:
+
+        response.data.data?.prepayId,
+
+      raw:
+
+        response.data
+
+    };
 
   }
 
@@ -48,11 +202,85 @@ export default class BinanceProvider extends BaseProvider {
 
   ): Promise<ProviderResponse> {
 
-    throw new Error(
+    const payload = {
 
-      "Not implemented."
+      prepayId:
 
-    );
+        input.transactionId
+
+    };
+
+    const timestamp =
+
+      Date.now();
+
+    const nonce =
+
+      crypto.randomUUID();
+
+    const signature =
+
+      this.sign(
+
+        `${timestamp}\n${nonce}\n${JSON.stringify(payload)}\n`
+
+      );
+
+    const response =
+
+      await this.client.post(
+
+        "/binancepay/openapi/order/query",
+
+        payload,
+
+        {
+
+          headers: {
+
+            "BinancePay-Timestamp":
+
+              timestamp,
+
+            "BinancePay-Nonce":
+
+              nonce,
+
+            "BinancePay-Certificate-SN":
+
+              this.apiKey,
+
+            "BinancePay-Signature":
+
+              signature
+
+          }
+
+        }
+
+      );
+
+    return {
+
+      success:
+
+        response.data.status ===
+
+        "SUCCESS",
+
+      message:
+
+        response.data.code,
+
+      transactionId:
+
+        input.transactionId,
+
+      raw:
+
+        response.data
+
+    };
 
   }
 
@@ -62,11 +290,19 @@ export default class BinanceProvider extends BaseProvider {
 
   ): Promise<ProviderResponse> {
 
-    throw new Error(
+    return {
 
-      "Not implemented."
+      success: false,
 
-    );
+      message:
+
+        "Binance Pay refunds require merchant refund workflow.",
+
+      transactionId:
+
+        input.transactionId
+
+    };
 
   }
 
@@ -78,11 +314,15 @@ export default class BinanceProvider extends BaseProvider {
 
   ): Promise<boolean> {
 
-    throw new Error(
+    const expected =
 
-      "Not implemented."
+      this.sign(
 
-    );
+        JSON.stringify(payload)
+
+      );
+
+    return expected === signature;
 
   }
 
