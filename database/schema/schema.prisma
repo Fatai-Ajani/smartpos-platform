@@ -1667,7 +1667,6 @@ model Transaction {
   paymentIntent           PaymentIntent?
   paymentAttempt          PaymentAttempt?
   gatewayRequest          GatewayRequest?
-  gatewayResponse         GatewayResponse?
   auditLogs               AuditLog[]          @relation("TransactionAuditLog")
   commissions Commission[]
   createdAt               DateTime            @default(now())
@@ -2334,8 +2333,7 @@ model CryptoConversion {
   exchangeOrderId       String?
   transactionId         String?
   transaction           Transaction?      @relation(fields: [transactionId], references: [id], onDelete: SetNull)
-  walletTransferId      String?
-  walletTransfer        WalletTransfer?   @relation(fields: [walletTransferId], references: [id], onDelete: SetNull)
+  walletTransfer WalletTransfer?
   metadata              Json?
   completedAt           DateTime?
   createdAt             DateTime          @default(now())
@@ -2383,6 +2381,8 @@ model WalletTransfer {
   merchantId            String
   merchant              Merchant   @relation(fields: [merchantId], references: [id], onDelete: Cascade)
   fromWalletId          String
+  coldWalletTransfer    ColdWalletTransfer?
+  hotWalletTransfer     HotWalletTransfer?
   fromWallet            Wallet     @relation(fields: [fromWalletId], references: [id], onDelete: Cascade, name: "FromWallet")
   toWalletId            String
   toWallet              Wallet     @relation(fields: [toWalletId], references: [id], onDelete: Cascade, name: "ToWallet")
@@ -2396,8 +2396,9 @@ model WalletTransfer {
   blockchainTransaction BlockchainTransaction? @relation(fields: [blockchainTxId], references: [txHash], onDelete: SetNull)
   metadata              Json?
   completedAt           DateTime?
-  cryptoConversionId    String?
-  cryptoConversion      CryptoConversion? @relation(fields: [cryptoConversionId], references: [id], onDelete: SetNull)
+  cryptoConversionId String? @unique
+
+  cryptoConversion CryptoConversion?  @relation(fields: [cryptoConversionId], references: [id], onDelete: SetNull)
   createdAt             DateTime   @default(now())
   updatedAt             DateTime   @updatedAt
 
@@ -2413,6 +2414,7 @@ model ColdWalletTransfer {
   id                    String     @id @default(cuid())
   walletTransferId      String     @unique
   walletTransfer        WalletTransfer @relation(fields: [walletTransferId], references: [id], onDelete: Cascade)
+  coldWalletTransfer ColdWalletTransfer?
   coldWalletAddress     String
   amount                Decimal    @db.Decimal(18, 8)
   currency              CurrencyType
@@ -2432,6 +2434,7 @@ model HotWalletTransfer {
   id                    String     @id @default(cuid())
   walletTransferId      String     @unique
   walletTransfer        WalletTransfer @relation(fields: [walletTransferId], references: [id], onDelete: Cascade)
+  hotWalletTransfer     HotWalletTransfer?
   hotWalletAddress      String
   amount                Decimal    @db.Decimal(18, 8)
   currency              CurrencyType
@@ -2476,6 +2479,7 @@ model ExchangeProvider {
   baseUrl               String?
   metadata              Json?
   orders                ExchangeOrder[]
+  quotes                ExchangeQuote[]
   createdAt             DateTime   @default(now())
   updatedAt             DateTime   @updatedAt
 
@@ -2812,6 +2816,7 @@ model Product {
   inventoryMovements    InventoryMovement[]
   inventoryAdjustments  InventoryAdjustment[]
   purchaseItems         PurchaseItem[]
+  transactionItems      TransactionItem[]
   createdAt             DateTime   @default(now())
   updatedAt             DateTime   @updatedAt
   deletedAt             DateTime?
@@ -3008,7 +3013,6 @@ model Customer {
   rewards               CustomerReward[]
   loyalty               CustomerLoyalty?
   activities            CustomerActivity[]
-  customerNotifications         CustomerNotification[]
   transactions          Transaction[]
   paymentIntents        PaymentIntent[]
   paymentMethods        PaymentMethod[]
