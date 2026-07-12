@@ -376,6 +376,8 @@ model User {
   passwordResets     PasswordReset[]
   merchantId         String?
   merchant           Merchant?           @relation(fields: [merchantId], references: [id], onDelete: SetNull)
+  assignedRoleId     String?
+  assignedRole       Role?               @relation(fields: [assignedRoleId], references: [id], onDelete: SetNull)
   refreshTokens      RefreshToken[]
   sessions           Session[]
   loginHistory       LoginHistory[]
@@ -396,6 +398,7 @@ model User {
   @@index([role])
   @@index([status])
   @@index([deletedAt])
+  @@index([assignedRoleId])
 }
 
 model RefreshToken {
@@ -620,6 +623,8 @@ model Merchant {
   // Relations
   users                  User[]
   terminals              Terminal[]
+  terminalGroups         TerminalGroup[]
+  receiptTemplates       ReceiptTemplate[]
   merchantSettings       MerchantSettings?
   merchantBranding       MerchantBranding?
   merchantSubscription   MerchantSubscription?
@@ -634,41 +639,34 @@ model Merchant {
   merchantNotificationSettings MerchantNotificationSettings?
   merchantSecuritySettings MerchantSecuritySettings?
   merchantWebhookSettings MerchantWebhookSettings?
-  liquidityPools         LiquidityPool[]
-  exchangeOrders         ExchangeOrder[]
   wallets                Wallet[]
   bankAccounts           BankAccount[]
   settlements            Settlement[]
   settlementBatches      SettlementBatch[]
-  settlementAttempts     SettlementAttempt[]
   settlementRules        SettlementRule[]
   settlementSchedules    SettlementSchedule[]
   transactions           Transaction[]
   refunds                Refund[]
+  refundReasons          RefundReason[]
   chargebacks            Chargeback[]
   disputes               Dispute[]
   paymentIntents         PaymentIntent[]
-  paymentAttempts        PaymentAttempt[]
+  paymentMethods         PaymentMethod[]
+  cardTokens             CardToken[]
   webhooks               Webhook[]
-  webhookDeliveries      WebhookDelivery[]
   webhookEvents          WebhookEvent[]
+  gatewayLogs            GatewayLog[]
+  cryptoConversions      CryptoConversion[]
+  walletTransfers        WalletTransfer[]
+  liquidityPools         LiquidityPool[]
+  exchangeOrders         ExchangeOrder[]
   kyc                    Kyc?
-  kycDocuments           KycDocument[]
-  kycReviews             KycReview[]
-  identityVerifications  IdentityVerification[]
-  addressVerifications   AddressVerification[]
-  sanctionChecks         SanctionCheck[]
-  pepChecks              PEPCheck[]
-  riskAssessments        RiskAssessment[]
-  amlChecks              AMLCheck[]
   complianceLogs         ComplianceLog[]
   complianceReviews      ComplianceReview[]
   products               Product[]
   categories             Category[]
   brands                 Brand[]
   inventory              Inventory[]
-  inventoryMovements     InventoryMovement[]
-  inventoryAdjustments   InventoryAdjustment[]
   suppliers              Supplier[]
   purchases              Purchase[]
   customers              Customer[]
@@ -676,7 +674,6 @@ model Merchant {
   payrolls               Payroll[]
   departments            Department[]
   reports                Report[]
-  reportExports          ReportExport[]
   dashboardWidgets       DashboardWidget[]
   notifications          Notification[]         @relation("MerchantNotification")
   activityLogs           ActivityLog[]          @relation("MerchantActivity")
@@ -991,7 +988,6 @@ model Terminal {
   scanner               Scanner?
   cashDrawer            CashDrawer?
   transactions          Transaction[]
-  receipts              ReceiptTemplate[]
   device                Device?
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
@@ -1131,7 +1127,7 @@ model TerminalLocation {
 
 model Device {
   id                    String     @id @default(cuid())
-  terminalId            String?
+  terminalId            String?    @unique
   terminal              Terminal?  @relation(fields: [terminalId], references: [id], onDelete: SetNull)
   name                  String
   type                  String
@@ -1220,9 +1216,12 @@ model Wallet {
   availableBalance      Decimal         @default(0) @db.Decimal(18, 8)
   status                WalletStatus    @default(ACTIVE)
   address               String?
-  blockchain            BlockchainNetwork?
+  blockchainId          String?
+  blockchain            BlockchainNetwork? @relation(fields: [blockchainId], references: [id], onDelete: SetNull)
   encryptedPrivateKey   String?
   publicKey             String?
+  bankAccountId         String?         @unique
+  bankAccount           BankAccount?    @relation(fields: [bankAccountId], references: [id], onDelete: SetNull)
   metadata              Json?
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
@@ -1232,23 +1231,18 @@ model Wallet {
   walletAddresses       WalletAddress[]
   walletKeys            WalletKey[]
   walletAudits          WalletAudit[]
-  bankAccount           BankAccount?    // if linked to bank
   settlements           Settlement[]
-  settlementAttempts    SettlementAttempt?
   transactionFees       TransactionFee[]
-  refunds               Refund[]
-  chargebacks           Chargeback[]
-  disputes              Dispute[]
-  cryptoConversions     CryptoConversion[]
-  walletTransfers       WalletTransfer[] // from this wallet
-  incomingTransfers     WalletTransfer[] @relation("IncomingTransfer")
-  exchangeOrders        ExchangeOrder?   // if used in exchange
-  liquidityPools        LiquidityPool?   // if pool
+  transactions          Transaction[]
+  blockchainTransactions BlockchainTransaction[]
+  walletTransfers       WalletTransfer[] @relation("FromWallet") // transfers originating from this wallet
+  incomingTransfers     WalletTransfer[] @relation("ToWallet")   // transfers received by this wallet
 
   @@index([merchantId])
   @@index([currency])
   @@index([type])
   @@index([address])
+  @@index([blockchainId])
 }
 
 model WalletBalance {
@@ -1272,7 +1266,8 @@ model WalletAddress {
   walletId              String
   wallet                Wallet     @relation(fields: [walletId], references: [id], onDelete: Cascade)
   address               String     @unique
-  blockchain            BlockchainNetwork
+  blockchainId          String
+  blockchain            BlockchainNetwork @relation(fields: [blockchainId], references: [id], onDelete: Cascade)
   isActive              Boolean    @default(true)
   label                 String?
   metadata              Json?
@@ -1280,6 +1275,7 @@ model WalletAddress {
   updatedAt             DateTime   @updatedAt
 
   @@index([walletId])
+  @@index([blockchainId])
 }
 
 model WalletKey {
@@ -1328,6 +1324,8 @@ model BankAccount {
   isDefault             Boolean    @default(false)
   isVerified            Boolean    @default(false)
   metadata              Json?
+  wallet                Wallet?
+  settlements           Settlement[]
   createdAt             DateTime   @default(now())
   updatedAt             DateTime   @updatedAt
 
@@ -1358,7 +1356,6 @@ model Settlement {
   attemptCount          Int               @default(0)
   attempts              SettlementAttempt[]
   fees                  SettlementFee[]
-  settlementSchedules   SettlementSchedule? // if scheduled
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
 
@@ -1489,7 +1486,8 @@ model ExchangeRateHistory {
 model BlockchainTransaction {
   id                    String                @id @default(cuid())
   txHash                String                @unique
-  blockchain            BlockchainNetwork
+  blockchainId          String
+  blockchain            BlockchainNetwork     @relation(fields: [blockchainId], references: [id], onDelete: Cascade)
   walletId              String?
   wallet                Wallet?               @relation(fields: [walletId], references: [id], onDelete: SetNull)
   fromAddress           String
@@ -1507,12 +1505,14 @@ model BlockchainTransaction {
   data                  Json?
   metadata              Json?
   confirmationsHistory  BlockchainConfirmation[]
-  walletTransfers       WalletTransfer?       // related transfer
+  walletTransfer        WalletTransfer?       // related transfer
+  transaction           Transaction?          // related POS transaction
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
 
   @@index([txHash])
   @@index([walletId])
+  @@index([blockchainId])
   @@index([fromAddress])
   @@index([toAddress])
   @@index([status])
@@ -1572,6 +1572,9 @@ model BlockchainNetwork {
   cryptoAssets          CryptoAsset[]
   explorer              BlockchainExplorer?
   customerWallets       CustomerWallet[]
+  wallets               Wallet[]
+  walletAddresses       WalletAddress[]
+  blockchainTransactions BlockchainTransaction[]
 }
 
 model GasPrice {
@@ -1643,9 +1646,14 @@ model Transaction {
   settlementCurrency      CurrencyType?
   settlementDate          DateTime?
   cryptoConversionId      String?
-  cryptoConversion        CryptoConversion?   @relation(fields: [cryptoConversionId], references: [id], onDelete: SetNull)
+  cryptoConversion        CryptoConversion?   @relation("TransactionCryptoConversion", fields: [cryptoConversionId], references: [id], onDelete: SetNull)
+  cryptoConversions       CryptoConversion[]  @relation("CryptoConversionTransaction")
   cryptoAmount            Decimal?            @db.Decimal(36, 18)
   cryptoCurrency          CurrencyType?
+  blockchainTransactionId String?             @unique
+  blockchainTransaction   BlockchainTransaction? @relation(fields: [blockchainTransactionId], references: [id], onDelete: SetNull)
+  paymentIntentId         String?
+  paymentIntent           PaymentIntent?      @relation(fields: [paymentIntentId], references: [id], onDelete: SetNull)
   // Relations
   items                   TransactionItem[]
   fees                    TransactionFee[]
@@ -1662,10 +1670,9 @@ model Transaction {
   capture                 Capture?
   reversal                Reversal?
   voidTransaction         VoidTransaction?
-  blockchainTransaction   BlockchainTransaction?
+  cardPayment             CardPayment?
   webhookDeliveries       WebhookDelivery[]
-  paymentIntent           PaymentIntent?
-  paymentAttempt          PaymentAttempt?
+  paymentAttempts         PaymentAttempt[]
   gatewayRequest          GatewayRequest?
   auditLogs               AuditLog[]          @relation("TransactionAuditLog")
   commissions Commission[]
@@ -1683,6 +1690,8 @@ model Transaction {
   @@index([createdAt(sort: Desc)])
   @@index([settlementStatus])
   @@index([paymentMethod])
+  @@index([cryptoConversionId])
+  @@index([paymentIntentId])
 }
 
 model TransactionItem {
@@ -1826,7 +1835,7 @@ model Refund {
   metadata              Json?
   refundReasonId        String?
   refundReason          RefundReason? @relation(fields: [refundReasonId], references: [id], onDelete: SetNull)
-  walletTransfers       WalletTransfer?
+  walletTransfer        WalletTransfer?
   createdAt             DateTime      @default(now())
   updatedAt             DateTime      @updatedAt
 
@@ -1905,12 +1914,15 @@ model Dispute {
   resolvedAt            DateTime?
   metadata              Json?
   evidence              DisputeEvidence[]
+  chargebackId          String?         @unique
+  chargeback            Chargeback?     @relation(fields: [chargebackId], references: [id], onDelete: SetNull)
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
 
   @@index([transactionId])
   @@index([merchantId])
   @@index([status])
+  @@index([chargebackId])
 }
 
 model DisputeEvidence {
@@ -2136,7 +2148,7 @@ model PaymentProvider {
   baseUrl               String?
   priority              Int        @default(0)
   gatewayRequests       GatewayRequest[]
-  gatewayResponses      GatewayResponse[]
+  providerResponses     ProviderResponse[]
   createdAt             DateTime   @default(now())
   updatedAt             DateTime   @updatedAt
 
@@ -2182,7 +2194,7 @@ model GatewayLog {
 
 model GatewayRequest {
   id                    String     @id @default(cuid())
-  transactionId         String?
+  transactionId         String?    @unique
   transaction           Transaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
   providerId            String
   provider              PaymentProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
@@ -2252,6 +2264,7 @@ model WebhookDelivery {
   nextRetryAt           DateTime?
   transactionId         String?
   transaction           Transaction?   @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  retries               WebhookRetry[]
   createdAt             DateTime       @default(now())
   updatedAt             DateTime       @updatedAt
 
@@ -2332,8 +2345,11 @@ model CryptoConversion {
   exchangeProvider      String?
   exchangeOrderId       String?
   transactionId         String?
-  transaction           Transaction?      @relation(fields: [transactionId], references: [id], onDelete: SetNull)
-  walletTransfer WalletTransfer?
+  transaction           Transaction?      @relation("CryptoConversionTransaction", fields: [transactionId], references: [id], onDelete: SetNull)
+  relatedTransactions   Transaction[]     @relation("TransactionCryptoConversion")
+  walletTransferId      String?
+  walletTransfer        WalletTransfer?   @relation("CryptoConversionWalletTransfer", fields: [walletTransferId], references: [id], onDelete: SetNull)
+  relatedWalletTransfers WalletTransfer[] @relation("WalletTransferCryptoConversion")
   metadata              Json?
   completedAt           DateTime?
   createdAt             DateTime          @default(now())
@@ -2341,6 +2357,7 @@ model CryptoConversion {
 
   @@index([merchantId])
   @@index([transactionId])
+  @@index([walletTransferId])
   @@index([status])
 }
 
@@ -2381,8 +2398,6 @@ model WalletTransfer {
   merchantId            String
   merchant              Merchant   @relation(fields: [merchantId], references: [id], onDelete: Cascade)
   fromWalletId          String
-  coldWalletTransfer    ColdWalletTransfer?
-  hotWalletTransfer     HotWalletTransfer?
   fromWallet            Wallet     @relation(fields: [fromWalletId], references: [id], onDelete: Cascade, name: "FromWallet")
   toWalletId            String
   toWallet              Wallet     @relation(fields: [toWalletId], references: [id], onDelete: Cascade, name: "ToWallet")
@@ -2392,13 +2407,17 @@ model WalletTransfer {
   status                String
   type                  String
   reference             String?    @unique
-  blockchainTxId        String?
+  blockchainTxId        String?    @unique
   blockchainTransaction BlockchainTransaction? @relation(fields: [blockchainTxId], references: [txHash], onDelete: SetNull)
   metadata              Json?
   completedAt           DateTime?
-  cryptoConversionId String? @unique
-
-  cryptoConversion CryptoConversion?  @relation(fields: [cryptoConversionId], references: [id], onDelete: SetNull)
+  cryptoConversionId    String?
+  cryptoConversion      CryptoConversion? @relation("WalletTransferCryptoConversion", fields: [cryptoConversionId], references: [id], onDelete: SetNull)
+  cryptoConversions     CryptoConversion[] @relation("CryptoConversionWalletTransfer")
+  refundId              String?    @unique
+  refund                Refund?    @relation(fields: [refundId], references: [id], onDelete: SetNull)
+  coldWalletTransfer    ColdWalletTransfer?
+  hotWalletTransfer     HotWalletTransfer?
   createdAt             DateTime   @default(now())
   updatedAt             DateTime   @updatedAt
 
@@ -2408,13 +2427,14 @@ model WalletTransfer {
   @@index([reference])
   @@index([status])
   @@index([blockchainTxId])
+  @@index([cryptoConversionId])
+  @@index([refundId])
 }
 
 model ColdWalletTransfer {
   id                    String     @id @default(cuid())
   walletTransferId      String     @unique
   walletTransfer        WalletTransfer @relation(fields: [walletTransferId], references: [id], onDelete: Cascade)
-  coldWalletTransfer ColdWalletTransfer?
   coldWalletAddress     String
   amount                Decimal    @db.Decimal(18, 8)
   currency              CurrencyType
@@ -2434,7 +2454,6 @@ model HotWalletTransfer {
   id                    String     @id @default(cuid())
   walletTransferId      String     @unique
   walletTransfer        WalletTransfer @relation(fields: [walletTransferId], references: [id], onDelete: Cascade)
-  hotWalletTransfer     HotWalletTransfer?
   hotWalletAddress      String
   amount                Decimal    @db.Decimal(18, 8)
   currency              CurrencyType
@@ -2605,8 +2624,6 @@ model Kyc {
   pepChecks             PEPCheck[]
   riskAssessments       RiskAssessment[]
   amlChecks             AMLCheck[]
-  complianceLogs        ComplianceLog[]
-  complianceReviews     ComplianceReview[]
   createdAt             DateTime       @default(now())
   updatedAt             DateTime       @updatedAt
 
@@ -3013,9 +3030,11 @@ model Customer {
   rewards               CustomerReward[]
   loyalty               CustomerLoyalty?
   activities            CustomerActivity[]
+  customerNotifications         CustomerNotification[]
   transactions          Transaction[]
   paymentIntents        PaymentIntent[]
   paymentMethods        PaymentMethod[]
+  cardTokens            CardToken[]
   notifications         Notification[]
   createdAt             DateTime   @default(now())
   updatedAt             DateTime   @updatedAt
