@@ -32,7 +32,7 @@ export default class StripeProvider extends BaseProvider {
 
       {
 
-        apiVersion: "2025-06-30.basil"
+        apiVersion: "2026-06-24.dahlia"
 
       }
 

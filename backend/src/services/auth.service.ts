@@ -23,21 +23,14 @@ export default class AuthService {
 
       });
 
-    if (!user) {
+    if (!user?.passwordHash) {
 
-      throw new Error(
-        "Invalid credentials."
-      );
-
+      throw new Error("Invalid credentials.");
     }
 
-    const valid =
-      await bcrypt.compare(
-
+    const valid = await bcrypt.compare(
         password,
-
-        user.password
-
+        user.passwordHash
       );
 
     if (!valid) {

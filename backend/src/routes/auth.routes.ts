@@ -5,7 +5,7 @@ import AuthController from "../controllers/auth.controller.js";
 
 import {
   authMiddleware
-} from "../middlewares/auth.middleware.js";
+} from "../middleware/auth.middleware.js";
 
 export default async function authRoutes(
   app: FastifyInstance

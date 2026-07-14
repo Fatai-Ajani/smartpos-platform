@@ -52,32 +52,7 @@ export default class SmartGatewaySelector {
 
     }
 
-    const currencyMatch =
-
-      activeProviders.find(
-
-        provider =>
-
-          provider.supportedCurrencies.includes(
-
-            input.currency
-
-          )
-
-      );
-
-    if (
-
-      currencyMatch
-
-    ) {
-
-      return currencyMatch;
-
-    }
-
-    return activeProviders[0];
-
+return activeProviders[0]
   }
 
 }

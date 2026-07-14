@@ -53,6 +53,10 @@ export const env = {
   BINANCE_API_KEY:
     process.env.BINANCE_API_KEY ||
     "",
+  BINANCE_SECRET_KEY:
+    process.env.BINANCE_SECRET_KEY ||
+    "",
+
   SMTP_HOST:
     process.env.SMTP_HOST || "",
   SMTP_PORT:

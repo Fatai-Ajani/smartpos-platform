@@ -6,7 +6,7 @@ import swaggerPlugin from "./plugins/swagger.js";
 import errorHandlerPlugin from "./plugins/error-handler.js";
 import requestValidatorPlugin from "./plugins/request-validator.js";
 
-import registerRoutes from "./routes.js";
+import registerRoutes from "./routes/index.js";
 
 const app = Fastify({
 

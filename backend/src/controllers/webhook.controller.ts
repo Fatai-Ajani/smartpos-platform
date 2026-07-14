@@ -25,20 +25,10 @@ export default class WebhookController {
     const webhook =
       await this.webhookService.receiveWebhook({
 
-        provider:
-          body.provider,
-
-        event:
-          body.event,
-
-        payload:
-          body.payload,
-
-        signature:
-          headers["x-signature"] as string,
-
-        headers
-
+        webhookId:    body.webhookId,
+        event:        body.event,
+        payload:      body.payload,
+        transactionId: body.transactionId
       });
 
     return reply.code(202).send({

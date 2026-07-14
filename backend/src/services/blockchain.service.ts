@@ -394,7 +394,7 @@ export default class BlockchainService {
 
         confirmationsHistory: true,
 
-        walletTransfers: true
+        walletTransfer: true
 
       }
 

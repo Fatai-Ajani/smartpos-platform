@@ -1,9 +1,9 @@
 import { Queue } from "bullmq";
-import IORedis from "ioredis";
+import { Redis } from "ioredis";
 
 import env from "../config/env.js";
 
-const connection = new IORedis(
+const connection = new Redis(
 
   env.REDIS_URL,
 

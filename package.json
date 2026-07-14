@@ -16,5 +16,8 @@
     "typecheck": "npm --workspace backend run typecheck",
     "lint": "npm --workspace backend run lint",
     "format": "npm --workspace backend run format"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^8.0.1"
   }
 }

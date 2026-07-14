@@ -1,7 +1,6 @@
 import EmailService from "./email.service.js";
 import SmsService from "./sms.service.js";
-import PushNotificationService from "./push-notification.service.js";
-
+import PushNotificationService from "./push.notification.service.js";
 export default class NotificationService {
 
   constructor(

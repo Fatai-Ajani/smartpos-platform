@@ -1,107 +1,105 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 
-import BlockchainService from "../services/blockchain.service.js";
+import TransactionService from "../services/transaction.service.js";
 
-export default class BlockchainController {
-
+export default class TransactionController {
   constructor(
-    private readonly blockchainService: BlockchainService
+    private readonly transactionService: TransactionService
   ) {}
 
-  createTransaction = async (
+  start = async (
     request: FastifyRequest,
     reply: FastifyReply
   ) => {
-
     const transaction =
-      await this.blockchainService.createTransaction(
+      await this.transactionService.startTransaction(
         request.body as any
       );
 
     return reply.code(201).send({
-
       success: true,
-
       data: transaction
-
     });
-
   };
 
-  confirmTransaction = async (
+  execute = async (
     request: FastifyRequest,
     reply: FastifyReply
   ) => {
-
-    const body =
-      request.body as any;
-
-    const confirmation =
-      await this.blockchainService.addConfirmation({
-
-        txId: body.txId,
-
-        confirmations: body.confirmations,
-
-        blockHash: body.blockHash,
-
-        blockTime: body.blockTime,
-
-        metadata: body.metadata
-
-      });
+    const result =
+      await this.transactionService.executePayment(
+        request.body as any
+      );
 
     return reply.send({
-
       success: true,
-
-      data: confirmation
-
+      data: result
     });
-
   };
 
-  walletTransfer = async (
+  settle = async (
     request: FastifyRequest,
     reply: FastifyReply
   ) => {
-
-    const transfer =
-      await this.blockchainService.createWalletTransfer(
+    const result =
+      await this.transactionService.settleTransaction(
         request.body as any
       );
 
-    return reply.code(201).send({
-
+    return reply.send({
       success: true,
-
-      data: transfer
-
+      data: result
     });
-
   };
 
-  getTransaction = async (
+  complete = async (
     request: FastifyRequest,
     reply: FastifyReply
   ) => {
-
     const { id } =
       request.params as any;
 
-    const transaction =
-      await this.blockchainService.findTransaction(
+    const result =
+      await this.transactionService.completeTransaction(
         id
       );
 
     return reply.send({
-
       success: true,
-
-      data: transaction
-
+      data: result
     });
-
   };
 
+  fail = async (
+    request: FastifyRequest,
+    reply: FastifyReply
+  ) => {
+    const result =
+      await this.transactionService.failTransaction(
+        request.body as any
+      );
+
+    return reply.send({
+      success: true,
+      data: result
+    });
+  };
+
+  get = async (
+    request: FastifyRequest,
+    reply: FastifyReply
+  ) => {
+    const { id } =
+      request.params as any;
+
+    const result =
+      await this.transactionService.getTransaction(
+        id
+      );
+
+    return reply.send({
+      success: true,
+      data: result
+    });
+  };
 }

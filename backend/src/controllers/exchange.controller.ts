@@ -1,53 +1,47 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import PaymentService from "../services/payment.service.js";
+import ExchangeService from "../services/exchange.service.js";
 
-export default class PaymentController {
-
+export default class ExchangeController {
   constructor(
-    private readonly paymentService: PaymentService
+    private readonly exchangeService: ExchangeService
   ) {}
 
-  createPaymentIntent = async (
+  createRate = async (
     request: FastifyRequest,
     reply: FastifyReply
   ) => {
-
-    const payment =
-      await this.paymentService.createPaymentIntent(
+    const rate =
+      await this.exchangeService.createExchangeRate(
         request.body as any
       );
 
     return reply.code(201).send({
-
       success: true,
-
-      message: "Payment Intent Created",
-
-      data: payment
-
+      message: "Exchange rate created",
+      data: rate
     });
-
   };
 
-  getPaymentIntent = async (
+  quote = async (
     request: FastifyRequest,
     reply: FastifyReply
   ) => {
+    const {
+      fromCurrency,
+      toCurrency,
+      amount
+    } = request.body as any;
 
-    const { id } =
-      request.params as any;
-
-    const payment =
-      await this.paymentService.getPaymentIntent(id);
+    const result =
+      await this.exchangeService.calculateQuote(
+        fromCurrency,
+        toCurrency,
+        amount
+      );
 
     return reply.send({
-
       success: true,
-
-      data: payment
-
+      data: result
     });
-
   };
-
 }

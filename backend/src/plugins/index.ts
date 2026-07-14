@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 
 import cors from '@fastify/cors';
+import redisPlugin from "./redis.plugin.js";
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import sensible from '@fastify/sensible';
@@ -9,8 +10,8 @@ import swaggerUI from '@fastify/swagger-ui';
 
 import { swaggerOptions } from '../config/swagger.js';
 
-import { registerJwt } from './jwt.js';
-import { registerPrisma } from './prisma.js';
+import registerJwt from './jwt.js';
+import registerPrisma from './prisma.js';
 
 export async function registerPlugins(app: FastifyInstance) {
   await app.register(helmet);
@@ -36,4 +37,5 @@ export async function registerPlugins(app: FastifyInstance) {
   await registerJwt(app);
 
   await registerPrisma(app);
+  await app.register(redisPlugin);
 }
