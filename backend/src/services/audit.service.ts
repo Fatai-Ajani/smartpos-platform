@@ -54,7 +54,7 @@ export default class AuditService {
 
           input.action,
 
-        resource:
+        entityType:
 
           input.resource,
 

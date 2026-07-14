@@ -658,9 +658,10 @@ export default class PaymentService {
 
         paymentAttempts: true,
 
-        gatewayRequest: true,
-
-        gatewayResponse: true,
+        gatewayRequest: {
+          include: {response: true
+            }
+          },
 
         blockchainTransaction: true,
 

@@ -1,57 +1,29 @@
 import { Job, Worker } from "bullmq";
 
-import {
-
-  BullConnection
-
-} from "./bullmq.queue.js";
+import { BullConnection } from "./bullmq.queue.js";
 
 import BlockchainService from "../services/blockchain.service.js";
 
 export default function createBlockchainWorker(
-
   blockchainService: BlockchainService
-
 ) {
-
   return new Worker(
-
     "blockchain",
 
-    async (
+    async (job: Job) => {
+      const { transactionId } = job.data;
 
-      job: Job
+      // TODO:
+      // Replace this with the actual blockchain processing
+      // once BlockchainService exposes the required methods.
 
-    ) => {
-
-      const {
-
+      await blockchainService.findTransaction(
         transactionId
-
-      } = job.data;
-
-      await blockchainService.syncTransaction(
-
-        transactionId
-
       );
-
-      await blockchainService.updateConfirmations(
-
-        transactionId
-
-      );
-
     },
 
     {
-
-      connection:
-
-        BullConnection
-
+      connection: BullConnection
     }
-
   );
-
 }

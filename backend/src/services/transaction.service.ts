@@ -326,9 +326,11 @@ export default class TransactionService {
 
         voidTransaction: true,
 
-        gatewayRequest: true,
-
-        gatewayResponse: true,
+        gatewayRequest: {
+          include: {
+            response: true
+          }
+        },
 
         blockchainTransaction: true,
 

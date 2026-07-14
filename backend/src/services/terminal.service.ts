@@ -20,8 +20,7 @@ export default class TerminalService {
             },
 
             {
-              terminalId:
-                data.terminalId
+              id: data.id
             }
 
           ]
