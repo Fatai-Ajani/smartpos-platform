@@ -357,23 +357,9 @@ export default class TransactionService {
   */
 
   async executePayment(data: {
-
     transactionId: string;
-
-    providerId: string;
-
-    endpoint: string;
-
-    method: string;
-
-    requestBody: Prisma.JsonValue;
-
-    requestHeaders: Prisma.JsonValue;
-
     fromCurrency: any;
-
     toCurrency: any;
-
   }) {
 
     console.log("STEP 1 - executePayment started");
@@ -392,6 +378,55 @@ export default class TransactionService {
       );
 
     }
+  
+  /*
+----------------------------------------
+Resolve Payment Provider
+----------------------------------------
+*/
+
+const providers =
+  await this.gatewayService.activeProviders();
+
+if (providers.length === 0) {
+
+  throw new Error(
+    "No active payment provider configured."
+  );
+
+}
+
+providers.sort(
+
+  (a, b) => b.priority - a.priority
+
+);
+
+const provider = providers[0];
+
+const endpoint =
+
+  provider.baseUrl ??
+
+  "/payments";
+
+const method = "POST";
+
+const requestBody = {
+
+  transactionId: transaction.id,
+
+  amount: transaction.amount.toString(),
+
+  currency: transaction.currency,
+
+  paymentMethod: transaction.paymentMethod,
+
+  reference: transaction.reference
+
+};
+
+const requestHeaders = {};
 
     /*
     ----------------------------------------
@@ -403,24 +438,12 @@ export default class TransactionService {
       await this.gatewayService
         .createGatewayRequest({
 
-          providerId:
-            data.providerId,
-
-          transactionId:
-            transaction.id,
-
-          endpoint:
-            data.endpoint,
-
-          method:
-            data.method,
-
-          requestBody:
-            data.requestBody,
-
-          requestHeaders:
-            data.requestHeaders
-
+          providerId: provider.id,
+          transactionId: transaction.id,
+          endpoint,
+          method,
+          requestBody,
+          requestHeaders            
         });
       
       console.log("STEP 3 - gateway request created");
@@ -458,9 +481,9 @@ export default class TransactionService {
       await this.exchangeService
         .calculateQuote(
 
-          data.fromCurrency,
+          data.fromCurrency ?? transaction.currency,
 
-          data.toCurrency,
+          data.toCurrency ?? transaction.currency,
 
           transaction.amount
 
@@ -475,25 +498,28 @@ export default class TransactionService {
     */
 
     const conversion =
-      await this.exchangeService
-        .createConversion({
+  await this.exchangeService
+    .createConversion({
 
-          merchantId:
-            transaction.merchantId,
+      merchantId:
+        transaction.merchantId,
 
-          transactionId:
-            transaction.id,
+      transactionId:
+        transaction.id,
 
-          fromCurrency:
-            data.fromCurrency,
+      fromCurrency:
+        data.fromCurrency ?? transaction.currency,
 
-          toCurrency:
-            data.toCurrency,
+      toCurrency:
+        data.toCurrency ?? transaction.currency,
 
-          fromAmount:
-            transaction.amount
+      fromAmount:
+        transaction.amount,
 
-        });
+      exchangeProvider:
+        provider.name
+
+    });
 
       console.log("STEP 6 - conversion created");
 
