@@ -13,13 +13,11 @@ export default function createBlockchainWorker(
     async (job: Job) => {
       const { transactionId } = job.data;
 
-      // TODO:
-      // Replace this with the actual blockchain processing
-      // once BlockchainService exposes the required methods.
+      // Placeholder until blockchain settlement worker is implemented.
 
-      await blockchainService.findTransaction(
-        transactionId
-      );
+await blockchainService.findTransaction(
+  transactionId
+);
     },
 
     {

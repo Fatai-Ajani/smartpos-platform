@@ -46,7 +46,9 @@ export async function registerPlugins(
 
   await registerPrisma(app);
 
-//  await app.register(redisPlugin);
+  if (process.env.REDIS_URL) {
+    await app.register(redisPlugin);
+  }
 
   await app.register(
     errorHandlerPlugin
