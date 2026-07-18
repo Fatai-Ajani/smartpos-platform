@@ -9,7 +9,7 @@ export default class CoinbaseProvider extends BaseProvider {
   readonly name = "coinbase";
   private readonly client: AxiosInstance;
   constructor(
-    private readonly apiKey: string
+    private readonly _apiKey: string
   ) {
     super();
     this.client = axios.create({
@@ -17,7 +17,7 @@ export default class CoinbaseProvider extends BaseProvider {
         "https://api.commerce.coinbase.com",
       headers: {
         "X-CC-Api-Key":
-          apiKey,
+          _apiKey,
         "X-CC-Version":
           "2018-03-22",
         "Content-Type":

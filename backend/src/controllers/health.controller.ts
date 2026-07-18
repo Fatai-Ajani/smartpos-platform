@@ -18,7 +18,7 @@ export default class HealthController {
 
   getHealth = async (
 
-    request: FastifyRequest,
+    _request: FastifyRequest,
 
     reply: FastifyReply
 

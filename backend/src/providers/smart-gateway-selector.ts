@@ -18,7 +18,7 @@ export default class SmartGatewaySelector {
 
     providers: PaymentProvider[],
 
-    input: GatewaySelectionInput
+    _input: GatewaySelectionInput
 
   ): PaymentProvider {
 

@@ -4,12 +4,9 @@ import {
   TransactionStatus,
   SettlementStatus
 } from "@prisma/client";
-import TransactionService from "./transaction.service.js";
 
 import { FastifyInstance } from "fastify";
-
 import crypto from "crypto";
-
 export default class PaymentService {
 
   constructor(

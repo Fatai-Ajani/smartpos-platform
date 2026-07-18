@@ -10,7 +10,7 @@ export async function idempotencyMiddleware(
 
   request: FastifyRequest,
 
-  reply: FastifyReply
+  _reply: FastifyReply
 
 ) {
 

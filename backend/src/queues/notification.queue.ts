@@ -26,7 +26,7 @@ export default function createNotificationWorker() {
 
         subject,
 
-        message
+        _message
 
       } = job.data;
 

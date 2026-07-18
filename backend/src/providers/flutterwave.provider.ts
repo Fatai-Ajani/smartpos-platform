@@ -9,7 +9,7 @@ export default class FlutterwaveProvider extends BaseProvider {
   readonly name = "flutterwave";
   private readonly client: AxiosInstance;
   constructor(
-    private readonly secretKey: string
+    private readonly _secretKey: string
   ) {
     super();
     this.client = axios.create({
@@ -17,7 +17,7 @@ export default class FlutterwaveProvider extends BaseProvider {
         "https://api.flutterwave.com/v3",
       headers: {
         Authorization:
-          `Bearer ${secretKey}`,
+          `Bearer ${_secretKey}`,
         "Content-Type":
           "application/json"
       }
@@ -114,7 +114,7 @@ export default class FlutterwaveProvider extends BaseProvider {
     };
   }
   async validateWebhook(
-    payload: any,
+    _payload: any,
     signature: string
   ): Promise<boolean> {
     const webhookSecret =

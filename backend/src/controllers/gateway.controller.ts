@@ -26,7 +26,7 @@ export default class GatewayController {
 
   providers = async (
 
-    request: FastifyRequest,
+    _request: FastifyRequest,
 
     reply: FastifyReply
 

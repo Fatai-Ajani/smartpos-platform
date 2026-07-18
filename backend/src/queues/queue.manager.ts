@@ -12,7 +12,7 @@ export default class QueueManager {
 
   constructor(
 
-    private readonly paymentService: PaymentService,
+    private readonly _paymentService: PaymentService,
 
     private readonly settlementService: SettlementService,
     

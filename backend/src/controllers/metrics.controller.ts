@@ -18,7 +18,7 @@ export default class MetricsController {
 
   getMetrics = async (
 
-    request: FastifyRequest,
+    _request: FastifyRequest,
 
     reply: FastifyReply
 
@@ -38,7 +38,7 @@ export default class MetricsController {
 
   resetMetrics = async (
 
-    request: FastifyRequest,
+    _request: FastifyRequest,
 
     reply: FastifyReply
 

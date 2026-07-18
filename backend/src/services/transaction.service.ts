@@ -1,7 +1,6 @@
 import {
   Prisma,
   TransactionStatus,
-  PaymentStatus,
   SettlementStatus,
 } from "@prisma/client";
 
@@ -12,7 +11,6 @@ import ExchangeService from "./exchange.service.js";
 import GatewayService from "./gateway.service.js";
 import SettlementService from "./settlement.service.js";
 import BlockchainService from "./blockchain.service.js";
-import { removeUndefinedFields } from "bullmq";
 
 export default class TransactionService {
 

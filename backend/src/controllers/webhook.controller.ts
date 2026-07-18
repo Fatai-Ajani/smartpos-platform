@@ -19,9 +19,6 @@ export default class WebhookController {
     const body =
       request.body as any;
 
-    const headers =
-      request.headers;
-
     const webhook =
       await this.webhookService.receiveWebhook({
 
