@@ -13,27 +13,47 @@ export default class MerchantService {
 
   async create(data: any) {
 
-    return this.app.prisma.merchant.create({
+  return this.app.prisma.$transaction(async (tx) => {
 
-      data: {
-        name: data.businessName,
-        businessType: data.businessType ?? "GENERAL",
-        email: data.email,
+    const merchant =
+      await tx.merchant.create({
 
-        phone: data.phone,
-        website: data.website,
+        data: {
+          name: data.businessName,
+          businessType: data.businessType ?? "GENERAL",
+          email: data.email,
+          phone: data.phone,
+          website: data.website,
+          country: data.country,
+          state: data.state,
+          city: data.city,
+          addressLine1: data.address,
+          postalCode: data.postalCode
+        }
 
-        country: data.country,
-        state: data.state,
-        city: data.city,
+      });
 
-        addressLine1: data.address,
-        postalCode: data.postalCode
-      }
+    const wallet =
+  await this.walletService.createWallet(
 
-    });
+    {
+      merchantId: merchant.id,
+      name: "Default Wallet",
+      currency: merchant.currency
+    },
 
-  }
+        tx as any
+
+      );
+
+    return {
+      merchant,
+      wallet
+    };
+
+  });
+
+}
 
   async findById(id: string) {
 

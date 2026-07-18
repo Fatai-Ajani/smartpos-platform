@@ -7,16 +7,18 @@ export default class WalletService {
     private readonly app: FastifyInstance
   ) {}
 
-  async createWallet(data: {
+  async createWallet(
+    data: {
   merchantId: string;
   name: string;
   currency: any;
   balance?: Prisma.Decimal;
   availableBalance?: Prisma.Decimal;
   reservedBalance?: Prisma.Decimal;
-}) {
+},
+db = this.app.prisma) {
 
-  return this.app.prisma.wallet.create({
+  return db.wallet.create({
 
     data: {
 
