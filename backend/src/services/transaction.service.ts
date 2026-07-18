@@ -362,8 +362,6 @@ export default class TransactionService {
     toCurrency: any;
   }) {
 
-    console.log("STEP 1 - executePayment started");
-
     const transaction =
       await this.getTransaction(
         data.transactionId
@@ -376,8 +374,6 @@ export default class TransactionService {
   );
 
 }
-
-    console.log("STEP 2 - transaction loaded");
 
     if (!transaction) {
 
@@ -453,8 +449,6 @@ const requestHeaders = {};
           requestBody,
           requestHeaders            
         });
-      
-      console.log("STEP 3 - gateway request created");
 
     /*
     ----------------------------------------
@@ -476,19 +470,34 @@ const requestHeaders = {};
             transaction.currency
 
         });
-      
-      console.log("STEP 4 - authorization complete");
 
       await this.app.prisma.transaction.update({
-        where:{
-          id: transaction.id
-        },
-        data: {
-          status: "AUTHORIZED"
-        }
-      });
 
-console.log("STEP 4.1 - transaction marked AUTHORIZED");
+  where: {
+    id: transaction.id
+  },
+
+  data: {
+    status: TransactionStatus.AUTHORIZED
+  }
+
+});
+
+await this.recordTransactionActivity({
+
+  transactionId: transaction.id,
+
+  title: "Transaction Authorized",
+
+  event: "TRANSACTION_AUTHORIZED",
+
+  previousStatus: TransactionStatus.INITIATED,
+
+  newStatus: TransactionStatus.AUTHORIZED,
+
+  description: "Payment authorization completed successfully."
+
+});
 
     /*
     ----------------------------------------
@@ -507,8 +516,6 @@ console.log("STEP 4.1 - transaction marked AUTHORIZED");
           transaction.amount
 
         );
-
-      console.log("STEP 5 - quote calculated");
 
     /*
     ----------------------------------------
@@ -540,49 +547,49 @@ console.log("STEP 4.1 - transaction marked AUTHORIZED");
 
     });
 
-      console.log("STEP 6 - conversion created");
-
     /*
     ----------------------------------------
     Save Gateway Response
     ----------------------------------------
     */
 
-    await this.gatewayService
-      .createGatewayResponse({
+    await this.gatewayService.createGatewayResponse({
 
-        gatewayRequestId:
-          gatewayRequest.id,
+  gatewayRequestId:
+    gatewayRequest.id,
 
-        statusCode: 200,
+  statusCode: 200,
 
-        responseBody: {
+  responseBody: {
 
-          approved: true
+    approved: true
 
-        },
+  },
 
-        responseHeaders: {},
+  responseHeaders: {},
 
-        responseTime: 150
+  responseTime: 150
 
-      });
+});
 
-    return {
+const completedTransaction =
+  await this.completeTransaction(
+    transaction.id
+  );
 
-      transaction,
+return {
 
-      authorization,
+  transaction: completedTransaction,
 
-      gatewayRequest,
+  authorization,
 
-      conversion,
+  gatewayRequest,
 
-      quote
+  conversion,
 
-    };
+  quote
 
-    console.log("STEP 7 - gateway response saved");
+};
 
   }
 
@@ -830,6 +837,22 @@ if (paymentAttempt) {
       }
 
     });
+
+    await this.recordTransactionActivity({
+
+  transactionId,
+
+  title: "Transaction Settled",
+
+  event: "TRANSACTION_SETTLED",
+
+  previousStatus: TransactionStatus.AUTHORIZED,
+
+  newStatus: TransactionStatus.SETTLED,
+
+  description: "Funds captured and settlement completed."
+
+});
 
     return this.getTransaction(
       transactionId
@@ -1155,6 +1178,60 @@ if (paymentAttempt) {
     });
 
   }
+
+  private async recordTransactionActivity(data: {
+  transactionId: string;
+
+  title: string;
+
+  event: string;
+
+  previousStatus?: TransactionStatus;
+
+  newStatus?: TransactionStatus;
+
+  description?: string;
+
+  metadata?: Prisma.JsonValue;
+}) {
+
+  await this.addTimeline({
+    transactionId: data.transactionId,
+    title: data.title,
+    description: data.description,
+    metadata: data.metadata
+  });
+
+  await this.addEvent({
+    transactionId: data.transactionId,
+    event: data.event,
+    metadata: data.metadata
+  });
+
+  if (
+    data.previousStatus &&
+    data.newStatus
+  ) {
+
+    await this.addStatusHistory({
+
+      transactionId:
+        data.transactionId,
+
+      previousStatus:
+        data.previousStatus,
+
+      newStatus:
+        data.newStatus,
+
+      metadata:
+        data.metadata
+
+    });
+
+  }
+
+}
 
   /*
   |--------------------------------------------------------------------------

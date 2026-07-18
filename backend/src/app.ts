@@ -1,17 +1,11 @@
 import Fastify from "fastify";
 
-import prismaPlugin from "./plugins/prisma.js";
-import jwtPlugin from "./plugins/jwt.js";
-import swaggerPlugin from "./plugins/swagger.js";
-import errorHandlerPlugin from "./plugins/error-handler.js";
-import requestValidatorPlugin from "./plugins/request-validator.js";
+import { registerPlugins } from "./plugins/index.js";
 
 import registerRoutes from "./routes/index.js";
 
 const app = Fastify({
-
   logger: true
-
 });
 
 async function buildApp() {
@@ -22,35 +16,7 @@ async function buildApp() {
   |--------------------------------------------------------------------------
   */
 
-  await app.register(
-
-    prismaPlugin
-
-  );
-
-  await app.register(
-
-    jwtPlugin
-
-  );
-
-  await app.register(
-
-    swaggerPlugin
-
-  );
-
-  await app.register(
-
-    errorHandlerPlugin
-
-  );
-
-  await app.register(
-
-    requestValidatorPlugin
-
-  );
+  await registerPlugins(app);
 
   /*
   |--------------------------------------------------------------------------
@@ -59,9 +25,7 @@ async function buildApp() {
   */
 
   await app.register(
-
     registerRoutes
-
   );
 
   /*
@@ -71,28 +35,15 @@ async function buildApp() {
   */
 
   app.get(
-
     "/health",
-
     async () => {
-
       return {
-
         success: true,
-
-        service:
-          "SmartPOS API",
-
-        status:
-          "healthy",
-
-        timestamp:
-          new Date()
-
+        service: "SmartPOS API",
+        status: "healthy",
+        timestamp: new Date()
       };
-
     }
-
   );
 
   return app;

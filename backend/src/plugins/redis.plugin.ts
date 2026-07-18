@@ -6,19 +6,19 @@ import env from "../config/env.js";
 
 export default fp(async (app) => {
 
-  const redis = new Redis(
+  if (!env.REDIS_URL) {
+  app.log.warn("Redis disabled.");
+  return;
+}
 
-    env.REDIS_URL,
+const redis = new Redis(env.REDIS_URL, {
+  maxRetriesPerRequest: null,
+  enableReadyCheck: false
+});
 
-    {
-
-      maxRetriesPerRequest: null,
-
-      enableReadyCheck: false
-
-    }
-
-  );
+redis.on("error", (err) => {
+  app.log.warn(`Redis unavailable: ${err.message}`);
+});
 
   app.decorate(
 

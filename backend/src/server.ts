@@ -20,7 +20,9 @@ async function start() {
 
   try {
 
-    console.log(app.printRoutes());
+    if (process.env.NODE_ENV === "development") {
+      console.log(app.printRoutes());
+    }
 
     await app.listen({
 

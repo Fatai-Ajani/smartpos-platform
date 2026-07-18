@@ -27,8 +27,6 @@ export default class TransactionController {
   reply: FastifyReply
 ) => {
 
-  console.log("BODY:", request.body);
-
   const result =
     await this.transactionService.executePayment(
       request.body as any

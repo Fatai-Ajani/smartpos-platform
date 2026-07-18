@@ -4,6 +4,7 @@ import {
   TransactionStatus,
   SettlementStatus
 } from "@prisma/client";
+import TransactionService from "./transaction.service.js";
 
 import { FastifyInstance } from "fastify";
 
@@ -183,46 +184,49 @@ export default class PaymentService {
   }) {
 
     const reference =
-      this.generateReference();
+  this.generateReference();
 
-    return this.app.prisma.transaction.create({
+const transaction =
+  await this.app.prisma.transaction.create({
 
-      data: {
+    data: {
 
-        merchantId: data.merchantId,
+      merchantId: data.merchantId,
 
-        terminalId: data.terminalId,
+      terminalId: data.terminalId,
 
-        customerId: data.customerId,
+      customerId: data.customerId,
 
-        walletId: data.walletId,
+      walletId: data.walletId,
 
-        amount: data.amount,
+      amount: data.amount,
 
-        currency: data.currency,
+      currency: data.currency,
 
-        paymentMethod: data.paymentMethod,
+      paymentMethod: data.paymentMethod,
 
-        type: data.type,
+      type: data.type,
 
-        description: data.description,
+      description: data.description,
 
-        metadata: data.metadata ?? Prisma.JsonNull,
+      metadata: data.metadata ?? Prisma.JsonNull,
 
-        settlementStatus:
-          SettlementStatus.PENDING,
+      settlementStatus:
+        SettlementStatus.PENDING,
 
-        reference,
+      reference,
 
-        status:
-          TransactionStatus.INITIATED,
+      status:
+        TransactionStatus.INITIATED,
 
-        paymentIntentId:
-          data.paymentIntentId,
+      paymentIntentId:
+        data.paymentIntentId,
 
-      }
+    }
 
-    });
+  });
+
+return transaction;
 
   }
 
