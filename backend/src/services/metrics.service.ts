@@ -1,69 +1,61 @@
+import { PrismaClient } from "@prisma/client";
+
 export default class MetricsService {
+  constructor(
+    private readonly prisma: PrismaClient
+  ) {}
 
-  private counters =
+  async getDashboardMetrics() {
+    const today = new Date();
 
-    new Map<
+    today.setHours(0, 0, 0, 0);
 
-      string,
+    const [
+      totalMerchants,
+      activeTerminals,
+      transactionsToday,
+      revenueResult,
+    ] = await Promise.all([
+      this.prisma.merchant.count(),
 
-      number
+      this.prisma.terminal.count({
+        where: {
+          isActive: true,
+        },
+      }),
 
-    >();
+      this.prisma.transaction.count({
+        where: {
+          createdAt: {
+            gte: today,
+          },
+        },
+      }),
 
-  increment(
+      this.prisma.transaction.aggregate({
+        _sum: {
+          amount: true,
+        },
+        where: {
+          status: {
+            in: [
+              "CAPTURED",
+              "SETTLED",
+            ],
+          },
+        },
+      }),
+    ]);
 
-    metric: string,
+    return {
+      totalMerchants,
 
-    value = 1
+      activeTerminals,
 
-  ) {
+      transactionsToday,
 
-    const current =
-
-      this.counters.get(
-
-        metric
-
-      ) ?? 0;
-
-    this.counters.set(
-
-      metric,
-
-      current + value
-
-    );
-
+      revenue:
+        revenueResult._sum.amount ?? 0,
+    };
   }
-
-  get(
-
-    metric: string
-
-  ) {
-
-    return this.counters.get(
-
-      metric
-
-    ) ?? 0;
-
-  }
-
-  all() {
-
-    return Object.fromEntries(
-
-      this.counters
-
-    );
-
-  }
-
-  reset() {
-
-    this.counters.clear();
-
-  }
-
 }

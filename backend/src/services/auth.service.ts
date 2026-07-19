@@ -52,13 +52,15 @@ export default class AuthService {
 
       });
 
-    return {
+    const { passwordHash, ...safeUser } = user;
 
-      token,
+return {
 
-      user
+  token,
 
-    };
+  user: safeUser
+
+};
 
   }
 

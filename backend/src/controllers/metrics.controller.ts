@@ -1,61 +1,26 @@
 import {
-
   FastifyReply,
-
-  FastifyRequest
-
+  FastifyRequest,
 } from "fastify";
 
 import MetricsService from "../services/metrics.service.js";
 
 export default class MetricsController {
-
   constructor(
-
     private readonly metrics: MetricsService
-
   ) {}
 
   getMetrics = async (
-
     _request: FastifyRequest,
-
     reply: FastifyReply
-
   ) => {
 
-    return reply.send({
-
-      success: true,
-
-      data:
-
-        this.metrics.all()
-
-    });
-
-  };
-
-  resetMetrics = async (
-
-    _request: FastifyRequest,
-
-    reply: FastifyReply
-
-  ) => {
-
-    this.metrics.reset();
+    const metrics =
+      await this.metrics.getDashboardMetrics();
 
     return reply.send({
-
       success: true,
-
-      message:
-
-        "Metrics reset."
-
+      data: metrics,
     });
-
   };
-
 }

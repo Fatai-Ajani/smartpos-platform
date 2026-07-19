@@ -4,37 +4,22 @@ import MetricsService from "../services/metrics.service.js";
 import MetricsController from "../controllers/metrics.controller.js";
 
 export default async function metricsRoutes(
-
   app: FastifyInstance
-
 ) {
 
   const service =
-
-    new MetricsService();
+    new MetricsService(
+      app.prisma
+    );
 
   const controller =
-
     new MetricsController(
-
       service
-
     );
 
   app.get(
-
     "/metrics",
-
     controller.getMetrics
-
-  );
-
-  app.delete(
-
-    "/metrics",
-
-    controller.resetMetrics
-
   );
 
 }

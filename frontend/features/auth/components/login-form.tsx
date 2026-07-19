@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { loginSchema, LoginFormValues } from "../schema/login.schema";
+import { loginSchema, LoginFormData } from "../schemas/login.schema";
 import { useLogin } from "../hooks/use-login";
 
 import { Button } from "@/components/ui/button";
@@ -13,18 +13,18 @@ import { Card } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 
 export function LoginForm() {
-  const mutation = useLogin();
+  const loginMutation = useLogin();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormValues>({
+  } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
 
-  async function onSubmit(data: LoginFormValues) {
-    mutation.mutate(data);
+  async function onSubmit(data: LoginFormData) {
+    loginMutation.mutate(data);
   }
 
   return (
@@ -78,10 +78,10 @@ export function LoginForm() {
 
         <Button
           className="w-full"
-          disabled={mutation.isPending}
+          disabled={loginMutation.isPending}
           type="submit"
         >
-          {mutation.isPending ? (
+          {loginMutation.isPending ? (
             <Spinner />
           ) : (
             "Sign In"

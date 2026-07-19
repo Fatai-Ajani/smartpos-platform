@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import "./globals.css";
 
+import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "@/providers/query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 
@@ -33,12 +34,20 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <QueryProvider>
-          <ThemeProvider>
-            {children}
-          </ThemeProvider>
-        </QueryProvider>
-      </body>
+
+  <QueryProvider>
+
+    <ThemeProvider>
+
+      {children}
+
+      <Toaster richColors />
+
+    </ThemeProvider>
+
+  </QueryProvider>
+
+</body>
     </html>
   );
 }

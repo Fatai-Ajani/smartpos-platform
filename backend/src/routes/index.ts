@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 
+import metricsRoutes from "./metrics.routes.js";
 import walletRoutes from "./wallet.routes.js";
 import merchantRoutes from "./merchant.routes.js";
 import paymentRoutes from "./payment.routes.js";
@@ -8,12 +9,17 @@ import blockchainRoutes from "./blockchain.routes.js";
 import exchangeRoutes from "./exchange.routes.js";
 import gatewayRoutes from "./gateway.routes.js";
 import settlementRoutes from "./settlement.routes.js";
+import authRoutes from "./auth.routes.js";
 
 export default async function registerRoutes(
   app: FastifyInstance
 ) {
 
   app.register(paymentRoutes, {
+    prefix: "/api/v1"
+  });
+
+  app.register(metricsRoutes, {
     prefix: "/api/v1"
   });
 
@@ -42,6 +48,10 @@ export default async function registerRoutes(
   });
 
   app.register(settlementRoutes, {
+    prefix: "/api/v1"
+  });
+
+  app.register(authRoutes, {
     prefix: "/api/v1"
   });
 

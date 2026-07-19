@@ -1,10 +1,10 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 import type { User } from "@/types/auth";
 
 interface AuthState {
   token: string | null;
-
   user: User | null;
 
   setAuth: (
@@ -15,34 +15,27 @@ interface AuthState {
   logout: () => void;
 }
 
-export const useAuthStore =
-create<AuthState>((set) => ({
-
-  token: null,
-
-  user: null,
-
-  setAuth: (
-    token,
-    user
-  ) =>
-
-    set({
-
-      token,
-
-      user,
-
-    }),
-
-  logout: () =>
-
-    set({
-
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
       token: null,
 
       user: null,
 
-    }),
+      setAuth: (token, user) =>
+        set({
+          token,
+          user,
+        }),
 
-}));
+      logout: () =>
+        set({
+          token: null,
+          user: null,
+        }),
+    }),
+    {
+      name: "smartpos-auth",
+    }
+  )
+);
