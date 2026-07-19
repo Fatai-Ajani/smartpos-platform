@@ -104,4 +104,27 @@ export default class TransactionController {
       data: result
     });
   };
+
+  list = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
+
+  const {
+    page = "1",
+    limit = "10",
+  } = request.query as any;
+
+  const result =
+    await this.transactionService.listTransactions(
+      Number(page),
+      Number(limit)
+    );
+
+  return reply.send({
+    success: true,
+    data: result,
+  });
+
+};
 }

@@ -1271,5 +1271,76 @@ if (paymentAttempt) {
 
   }
 
+  /*
+|--------------------------------------------------------------------------
+| List Transactions
+|--------------------------------------------------------------------------
+*/
+
+async listTransactions(
+  page = 1,
+  limit = 10
+) {
+
+  const skip =
+    (page - 1) * limit;
+
+  const [items, total] =
+    await this.app.prisma.$transaction([
+
+      this.app.prisma.transaction.findMany({
+
+        skip,
+
+        take: limit,
+
+        orderBy: {
+          createdAt: "desc"
+        },
+
+        include: {
+          merchant: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+
+          terminal: {
+            select: {
+              id: true,
+              serialNumber: true,
+            },
+          },
+        },
+
+      }),
+
+      this.app.prisma.transaction.count(),
+
+    ]);
+
+  return {
+
+    items,
+
+    pagination: {
+
+      page,
+
+      limit,
+
+      total,
+
+      pages: Math.ceil(
+        total / limit
+      ),
+
+    },
+
+  };
+
+}
+
 }
 

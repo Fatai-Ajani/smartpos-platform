@@ -39,6 +39,11 @@ export default async function transactionRoutes(
   );
 
   app.get(
+  "/transactions",
+  controller.list
+  );
+
+  app.get(
     "/transactions/:id",
     controller.get
   );

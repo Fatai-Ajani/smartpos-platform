@@ -1,95 +1,97 @@
 "use client";
 
 import {
-  Users,
-  Monitor,
   CreditCard,
   DollarSign,
+  Users,
 } from "lucide-react";
 
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { StatCard } from "@/components/dashboard/stat-card";
+import { TransactionsTable } from "@/components/dashboard/transactions-table";
 
 import { useDashboardMetrics } from "@/features/dashboard/hooks/use-dashboard-metrics";
 
 export default function DashboardPage() {
+
   const {
     data,
     isLoading,
   } = useDashboardMetrics();
 
   return (
+
     <main className="flex min-h-screen bg-slate-100">
 
       <Sidebar />
 
-      <section className="flex-1">
+      <section className="flex-1 min-w-0">
 
         <Topbar />
 
-        <div className="p-10 text-slate-900">
+        <div className="p-8">
 
-          <h1 className="text-3xl font-bold">
-            SmartPOS Dashboard
-          </h1>
+          <div className="mb-8">
 
-          <p className="mt-4 text-slate-600">
-            Welcome to your dashboard.
-          </p>
+            <h1 className="text-3xl font-bold text-slate-900">
+              Dashboard
+            </h1>
 
+            <p className="mt-2 text-slate-600">
+              Monitor today's platform activity.
+            </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mt-8">
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
 
             <StatCard
-              title="Total Merchants"
+              title="Revenue Today"
               value={
                 isLoading
                   ? "..."
-                  : String(data?.totalMerchants ?? 0)
+                  : `$${Number(
+                      data?.revenue ?? 0
+                    ).toLocaleString()}`
               }
-              icon={<Users size={28} />}
+              icon={<DollarSign size={28} />}
             />
-
-
-            <StatCard
-              title="Active Terminals"
-              value={
-                isLoading
-                  ? "..."
-                  : String(data?.activeTerminals ?? 0)
-              }
-              icon={<Monitor size={28} />}
-            />
-
 
             <StatCard
               title="Transactions Today"
               value={
                 isLoading
                   ? "..."
-                  : String(data?.transactionsToday ?? 0)
+                  : Number(
+                      data?.transactionsToday ?? 0
+                    ).toLocaleString()
               }
               icon={<CreditCard size={28} />}
             />
 
-
             <StatCard
-              title="Revenue"
+              title="Merchants"
               value={
                 isLoading
                   ? "..."
-                  : `$${Number(data?.revenue ?? 0).toLocaleString()}`
+                  : Number(
+                      data?.totalMerchants ?? 0
+                    ).toLocaleString()
               }
-              icon={<DollarSign size={28} />}
+              icon={<Users size={28} />}
             />
 
           </div>
+
+          <TransactionsTable />
 
         </div>
 
       </section>
 
     </main>
+
   );
+
 }

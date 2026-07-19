@@ -1,110 +1,245 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+
 import {
-  LayoutDashboard,
-  Users,
-  Wallet,
-  Settings,
+  ChevronDown,
+  ChevronRight,
   LogOut,
-  Menu,
 } from "lucide-react";
 
-import { useState } from "react";
+import { navigation } from "@/config/navigation";
 import { useAuthStore } from "@/store/auth.store";
+import { useSidebarStore } from "@/store/sidebar.store";
 
 export function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
 
-  const logout = useAuthStore(
-    (state) => state.logout
-  );
+  const pathname =
+    usePathname();
+
+  const logout =
+    useAuthStore(
+      (state) => state.logout
+    );
+
+  const collapsed =
+    useSidebarStore(
+      (state) => state.collapsed
+    );
+
+  const [openGroup, setOpenGroup] =
+    useState<string | null>("Operations");
 
   return (
+
     <aside
-      className={`
-        min-h-screen
-        bg-slate-900
-        text-white
-        p-4
-        transition-all
-        duration-300
-        ${collapsed ? "w-20" : "w-64"}
-      `}
+      className={`sticky top-0 flex h-screen flex-col border-r border-slate-200 bg-white transition-all duration-300 ${
+        collapsed
+          ? "w-20"
+          : "w-64"
+      }`}
     >
 
-      <div className="flex items-center justify-between mb-8">
+      {/* Logo */}
 
-        {!collapsed && (
-          <h1 className="text-2xl font-bold">
-            SmartPOS
-          </h1>
+      <div className="flex h-16 items-center border-b border-slate-200 px-6">
+
+        {collapsed ? (
+
+          <div className="mx-auto text-xl font-bold text-blue-600">
+            SP
+          </div>
+
+        ) : (
+
+          <div>
+
+            <h1 className="text-xl font-bold text-slate-900">
+              SmartPOS
+            </h1>
+
+            <p className="text-xs text-slate-500">
+              Admin Platform
+            </p>
+
+          </div>
+
         )}
 
+      </div>
+
+      {/* Navigation */}
+
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
+
+        <div className="space-y-1">
+
+          {navigation.map((item) => {
+
+            const Icon =
+              item.icon;
+
+            if (!item.children) {
+
+              const active =
+                pathname === item.href;
+
+              return (
+
+                <Link
+                  key={item.title}
+                  href={item.href}
+                  className={`flex h-11 items-center gap-3 rounded-xl px-3 transition ${
+                    active
+                      ? "bg-blue-600 text-white shadow-sm"
+                      : "text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+
+                  <Icon size={19} />
+
+                  {!collapsed && (
+
+                    <span className="truncate text-sm font-medium">
+
+                      {item.title}
+
+                    </span>
+
+                  )}
+
+                </Link>
+
+              );
+
+            }
+
+            const opened =
+              openGroup === item.title;
+
+            return (
+
+              <div key={item.title}>
+
+                <button
+                  onClick={() =>
+                    setOpenGroup(
+                      opened
+                        ? null
+                        : item.title
+                    )
+                  }
+                  className="flex h-11 w-full items-center justify-between rounded-xl px-3 text-slate-700 transition hover:bg-slate-100"
+                >
+
+                  <div className="flex items-center gap-3">
+
+                    <Icon size={19} />
+
+                    {!collapsed && (
+
+                      <span className="truncate text-sm font-medium">
+
+                        {item.title}
+
+                      </span>
+
+                    )}
+
+                  </div>
+
+                  {!collapsed && (
+
+                    opened
+                      ? <ChevronDown size={16} />
+                      : <ChevronRight size={16} />
+
+                  )}
+
+                </button>
+
+                {!collapsed &&
+                  opened && (
+
+                    <div className="ml-7 mt-1 border-l border-slate-200 pl-3">
+
+                      {item.children.map((child) => {
+
+                        const ChildIcon =
+                          child.icon;
+
+                        const active =
+                          pathname === child.href;
+
+                        return (
+
+                          <Link
+                            key={child.title}
+                            href={child.href}
+                            className={`mb-1 flex h-10 items-center gap-3 rounded-lg px-3 transition ${
+                              active
+                                ? "bg-blue-50 font-medium text-blue-600"
+                                : "text-slate-600 hover:bg-slate-100"
+                            }`}
+                          >
+
+                            <ChildIcon size={16} />
+
+                            <span className="truncate text-sm">
+
+                              {child.title}
+
+                            </span>
+
+                          </Link>
+
+                        );
+
+                      })}
+
+                    </div>
+
+                  )}
+
+              </div>
+
+            );
+
+          })}
+
+        </div>
+
+      </nav>
+
+      {/* Footer */}
+
+      <div className="border-t border-slate-200 p-3">
+
         <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-2 rounded hover:bg-slate-700"
+          onClick={logout}
+          className="flex h-11 w-full items-center gap-3 rounded-xl px-3 text-red-600 transition hover:bg-red-50"
         >
-          <Menu size={22} />
+
+          <LogOut size={19} />
+
+          {!collapsed && (
+
+            <span className="font-medium">
+
+              Logout
+
+            </span>
+
+          )}
+
         </button>
 
       </div>
 
-
-      <nav className="space-y-2">
-
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-3 p-3 rounded hover:bg-slate-700"
-        >
-          <LayoutDashboard size={20} />
-
-          {!collapsed && "Dashboard"}
-        </Link>
-
-
-        <Link
-          href="/dashboard/users"
-          className="flex items-center gap-3 p-3 rounded hover:bg-slate-700"
-        >
-          <Users size={20} />
-
-          {!collapsed && "Users"}
-        </Link>
-
-
-        <Link
-          href="/dashboard/wallets"
-          className="flex items-center gap-3 p-3 rounded hover:bg-slate-700"
-        >
-          <Wallet size={20} />
-
-          {!collapsed && "Wallets"}
-        </Link>
-
-
-        <Link
-          href="/dashboard/settings"
-          className="flex items-center gap-3 p-3 rounded hover:bg-slate-700"
-        >
-          <Settings size={20} />
-
-          {!collapsed && "Settings"}
-        </Link>
-
-      </nav>
-
-
-      <button
-        onClick={logout}
-        className="mt-10 flex items-center gap-3 p-3 rounded hover:bg-slate-700 w-full"
-      >
-        <LogOut size={20} />
-
-        {!collapsed && "Logout"}
-      </button>
-
-
     </aside>
+
   );
+
 }
