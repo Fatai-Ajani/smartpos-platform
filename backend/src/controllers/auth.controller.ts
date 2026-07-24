@@ -21,8 +21,11 @@ export default class AuthController {
 
   ) => {
 
-    const body =
-      request.body as any;
+    const body = request.body as any;
+
+console.log("\n=== LOGIN BODY ===");
+console.log(body);
+console.log("==================\n");
 
     const result =
       await this.authService.login(
