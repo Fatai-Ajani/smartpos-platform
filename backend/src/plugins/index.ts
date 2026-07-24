@@ -22,7 +22,14 @@ export async function registerPlugins(
   await app.register(helmet);
 
   await app.register(cors, {
-    origin: true,
+    origin: [
+      "http://localhost:3001",
+      "http://localhost:3002",
+      "http://127.0.0.1:3001",
+      "http://127.0.0.1:3002",
+      "https://friendly-space-fishstick-r4j46545qgvgf5w9-3001.app.github.dev",
+      "https://friendly-space-fishstick-r4j46545qgvgf5w9-3002.app.github.dev"
+    ],
     credentials: true
   });
 
