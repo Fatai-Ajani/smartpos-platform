@@ -6,7 +6,6 @@ import { useTransactions } from "@/features/transactions/hooks/use-transactions"
 import type { Transaction } from "@/features/transactions/types/transaction";
 
 export function TransactionTable() {
-
   const router = useRouter();
 
   const {
@@ -16,38 +15,40 @@ export function TransactionTable() {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl border p-6">
-        Loading...
+      <div className="rounded-xl border border-slate-200 bg-white p-6 text-slate-600">
+        Loading transactions...
       </div>
     );
   }
 
+  const transactions = data ?? [];
+
   return (
-    <div className="overflow-hidden rounded-xl border bg-white">
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 
       <table className="w-full">
 
-        <thead className="bg-slate-100">
+        <thead className="border-b border-slate-200 bg-slate-50">
 
           <tr>
 
-            <th className="p-4 text-left">
+            <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
               ID
             </th>
 
-            <th className="p-4 text-left">
+            <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
               Merchant
             </th>
 
-            <th className="p-4 text-left">
+            <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
               Amount
             </th>
 
-            <th className="p-4 text-left">
+            <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
               Status
             </th>
 
-            <th className="p-4 text-left">
+            <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
               Date
             </th>
 
@@ -55,15 +56,15 @@ export function TransactionTable() {
 
         </thead>
 
-        <tbody>
+        <tbody className="divide-y divide-slate-200">
 
-          {(data ?? []).length === 0 ? (
+          {transactions.length === 0 ? (
 
             <tr>
 
               <td
                 colSpan={5}
-                className="p-10 text-center text-slate-500"
+                className="px-6 py-10 text-center text-sm text-slate-500"
               >
                 No transactions found.
               </td>
@@ -72,7 +73,7 @@ export function TransactionTable() {
 
           ) : (
 
-            (data ?? []).map(
+            transactions.map(
               (transaction: Transaction) => (
 
                 <tr
@@ -82,26 +83,26 @@ export function TransactionTable() {
                       `/dashboard/transactions/${transaction.id}`
                     )
                   }
-                  className="cursor-pointer border-t hover:bg-slate-50"
+                  className="cursor-pointer transition-colors hover:bg-slate-50"
                 >
 
-                  <td className="p-4 font-mono text-sm">
-                    {transaction.id.slice(0,10)}
+                  <td className="px-6 py-4 font-mono text-sm text-slate-700">
+                    {transaction.id.slice(0, 10)}
                   </td>
 
-                  <td className="p-4">
+                  <td className="px-6 py-4 text-sm font-medium text-slate-900">
                     {transaction.merchantId ?? "-"}
                   </td>
 
-                  <td className="p-4">
+                  <td className="px-6 py-4 text-sm font-medium text-slate-900">
                     {transaction.amount} {transaction.currency}
                   </td>
 
-                  <td className="p-4">
+                  <td className="px-6 py-4 text-sm font-medium text-slate-900">
                     {transaction.status}
                   </td>
 
-                  <td className="p-4">
+                  <td className="px-6 py-4 text-sm text-slate-600">
                     {new Date(
                       transaction.createdAt
                     ).toLocaleDateString()}
@@ -120,5 +121,4 @@ export function TransactionTable() {
 
     </div>
   );
-
 }

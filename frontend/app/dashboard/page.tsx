@@ -9,8 +9,6 @@ import {
   ArrowDownRight,
 } from "lucide-react";
 
-import { Sidebar } from "@/components/layout/sidebar";
-import { Topbar } from "@/components/layout/topbar";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { TransactionsTable } from "@/components/dashboard/transactions-table";
 
@@ -27,15 +25,7 @@ export default function DashboardPage() {
   const merchants = Number(data?.totalMerchants ?? 0);
 
   return (
-    <main className="flex min-h-screen bg-slate-50">
-
-      <Sidebar />
-
-      <section className="min-w-0 flex-1">
-
-        <Topbar />
-
-        <div className="p-6 lg:p-8">
+    <div>
 
           {/* Page Header */}
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -208,10 +198,6 @@ export default function DashboardPage() {
 
           </div>
 
-        </div>
-
-      </section>
-
-    </main>
+    </div>
   );
 }
