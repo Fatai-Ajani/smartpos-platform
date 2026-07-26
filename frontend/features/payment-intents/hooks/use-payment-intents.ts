@@ -4,22 +4,18 @@ import { useQuery } from "@tanstack/react-query";
 
 import { api } from "@/lib/api/client";
 import { ENDPOINTS } from "@/lib/api/endpoints";
+
 import type {
-  PaymentIntentListResponse,
+  PaymentIntent,
   PaymentIntentResponse,
-} from "@/types/payment";
+} from "@/features/payment-intents/types/payment-intent";
 
-async function getPaymentIntents(): Promise<PaymentIntentResponse[]> {
-  const response =
-    await api.get<PaymentIntentListResponse>(
-      ENDPOINTS.paymentIntents.list
-    );
+async function getPaymentIntents(): Promise<PaymentIntent[]> {
+  const response = await api.get<PaymentIntentResponse>(
+    ENDPOINTS.paymentIntents.list
+  );
 
-  if (Array.isArray(response.data)) {
-    return response.data;
-  }
-
-  return response.data.data;
+  return response.data.data.items;
 }
 
 export function usePaymentIntents() {
