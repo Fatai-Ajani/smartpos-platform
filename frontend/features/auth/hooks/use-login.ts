@@ -32,12 +32,25 @@ export function useLogin() {
       router.replace("/dashboard");
     },
 
-    onError(error: any) {
+    onError(error: unknown) {
       console.error("LOGIN ERROR:", error);
-      console.error("LOGIN RESPONSE:", error?.response?.data);
+      const responseData =
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error
+          ? (error as {
+              response?: {
+                data?: {
+                  message?: string;
+                };
+              };
+            }).response?.data
+          : undefined;
+
+      console.error("LOGIN RESPONSE:", responseData);
 
       toast.error(
-        error?.response?.data?.message ??
+        responseData?.message ??
         "Unable to login."
       );
     },
