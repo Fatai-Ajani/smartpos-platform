@@ -22,17 +22,17 @@ export default function TransactionDetailsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center p-8">
-        <div className="text-sm font-medium text-slate-500">
+      <div className="flex min-h-[400px] items-center justify-center">
+        <p className="text-sm text-slate-600">
           Loading transaction details...
-        </div>
+        </p>
       </div>
     );
   }
 
   if (error || !transaction) {
     return (
-      <div className="space-y-6 p-8">
+      <div className="space-y-6">
         <Link
           href="/dashboard/transactions"
           className="inline-flex text-sm font-medium text-blue-600 hover:text-blue-800"
@@ -45,7 +45,7 @@ export default function TransactionDetailsPage() {
             Unable to load transaction
           </h1>
 
-          <p className="mt-2 text-sm text-red-600">
+          <p className="mt-2 text-sm text-red-700">
             The requested transaction could not be found or could not be
             loaded from the SmartPOS API.
           </p>
@@ -55,7 +55,8 @@ export default function TransactionDetailsPage() {
   }
 
   return (
-    <div className="space-y-8 p-8">
+    <div className="space-y-6">
+
       <div>
         <Link
           href="/dashboard/transactions"
@@ -64,38 +65,43 @@ export default function TransactionDetailsPage() {
           ← Back to Transactions
         </Link>
 
-        <div className="mt-4">
-          <h1 className="text-3xl font-bold text-slate-900">
-            Transaction Details
-          </h1>
+        <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-900">
+          Transaction Details
+        </h1>
 
-          <p className="mt-2 text-slate-500">
-            Review the full details of this payment transaction.
-          </p>
-        </div>
+        <p className="mt-2 text-sm text-slate-600">
+          Review the full details of this payment transaction.
+        </p>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-200 bg-slate-50 px-8 py-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-500">
-                Transaction Reference
-              </p>
 
-              <h2 className="mt-1 text-xl font-bold text-slate-900">
-                {transaction.reference}
-              </h2>
-            </div>
+        <div className="flex flex-col gap-4 border-b border-slate-200 bg-slate-50 px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
 
-            <TransactionStatus status={transaction.status} />
+          <div>
+            <p className="text-sm font-medium text-slate-600">
+              Transaction Reference
+            </p>
+
+            <h2 className="mt-1 text-xl font-bold text-slate-900">
+              {transaction.reference ?? transaction.id}
+            </h2>
           </div>
+
+          <TransactionStatus status={transaction.status} />
+
         </div>
 
-        <div className="grid gap-8 p-8 sm:grid-cols-2">
+        <div className="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-3">
+
+          <DetailItem
+            label="Transaction ID"
+            value={transaction.id}
+          />
+
           <DetailItem
             label="Reference"
-            value={transaction.reference ?? "-"}
+            value={transaction.reference}
           />
 
           <DetailItem
@@ -109,18 +115,75 @@ export default function TransactionDetailsPage() {
           />
 
           <DetailItem
+            label="Transaction Type"
+            value={transaction.type}
+          />
+
+          <DetailItem
             label="Payment Method"
-            value={transaction.reference ?? "-"}
+            value={transaction.paymentMethod}
           />
 
           <DetailItem
             label="Merchant"
-            value={transaction.merchantId ?? "-"}
+            value={transaction.merchant?.name ?? transaction.merchantId}
           />
 
           <DetailItem
             label="Terminal"
-            value={"-"}
+            value={
+              transaction.terminal?.serialNumber ??
+              transaction.terminalId
+            }
+          />
+
+          <DetailItem
+            label="Customer"
+            value={
+              transaction.customer?.email ??
+              transaction.customerId
+            }
+          />
+
+          <DetailItem
+            label="Card Brand"
+            value={transaction.cardBrand}
+          />
+
+          <DetailItem
+            label="Card Last Four"
+            value={
+              transaction.cardLastFour
+                ? `•••• ${transaction.cardLastFour}`
+                : undefined
+            }
+          />
+
+          <DetailItem
+            label="Gateway Provider"
+            value={transaction.gatewayProvider}
+          />
+
+          <DetailItem
+            label="Gateway Transaction ID"
+            value={transaction.gatewayTransactionId}
+          />
+
+          <DetailItem
+            label="Settlement Status"
+            value={transaction.settlementStatus}
+          />
+
+          <DetailItem
+            label="Settlement Amount"
+            value={
+              transaction.settlementAmount != null
+                ? `${transaction.settlementAmount} ${
+                    transaction.settlementCurrency ??
+                    transaction.currency
+                  }`
+                : undefined
+            }
           />
 
           <DetailItem
@@ -129,11 +192,23 @@ export default function TransactionDetailsPage() {
           />
 
           <DetailItem
-            label="Description"
-            value={transaction.reference ?? "-"}
+            label="Updated"
+            value={
+              transaction.updatedAt
+                ? formatDate(transaction.updatedAt)
+                : undefined
+            }
           />
+
+          <DetailItem
+            label="Description"
+            value={transaction.description}
+          />
+
         </div>
+
       </div>
+
     </div>
   );
 }
@@ -143,17 +218,19 @@ function DetailItem({
   value,
 }: {
   label: string;
-  value: string;
+  value?: string | number | null;
 }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
         {label}
       </p>
 
       <p className="mt-2 break-words text-sm font-semibold text-slate-900">
-        {value}
+        {value ?? "-"}
       </p>
+
     </div>
   );
 }
@@ -167,13 +244,13 @@ function TransactionStatus({
 
   const statusStyles =
     normalizedStatus === "SETTLED"
-      ? "border-green-200 bg-green-100 text-green-700"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
       : normalizedStatus === "PENDING"
-        ? "border-yellow-200 bg-yellow-100 text-yellow-700"
+        ? "border-amber-200 bg-amber-50 text-amber-700"
         : normalizedStatus === "FAILED"
-          ? "border-red-200 bg-red-100 text-red-700"
+          ? "border-red-200 bg-red-50 text-red-700"
           : normalizedStatus === "REFUNDED"
-            ? "border-purple-200 bg-purple-100 text-purple-700"
+            ? "border-purple-200 bg-purple-50 text-purple-700"
             : "border-slate-200 bg-slate-100 text-slate-700";
 
   return (
