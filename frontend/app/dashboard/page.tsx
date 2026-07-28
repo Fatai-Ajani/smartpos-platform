@@ -20,8 +20,8 @@ export default function DashboardPage() {
     isLoading,
   } = useDashboardMetrics();
 
-  const revenue = Number(data?.totalRevenue ?? 0);
-  const transactions = Number(data?.totalTransactions ?? 0);
+  const revenue = Number(data?.revenue ?? 0);
+  const transactions = Number(data?.transactionsToday ?? 0);
   const merchants = Number(data?.totalMerchants ?? 0);
 
   return (

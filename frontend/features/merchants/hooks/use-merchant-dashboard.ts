@@ -6,10 +6,16 @@ import { api } from "@/lib/api/client";
 import { ENDPOINTS } from "@/lib/api/endpoints";
 
 export interface MerchantDashboard {
-  totalTransactions: number;
-  totalRevenue: number;
-  successfulPayments: number;
-  failedPayments: number;
+  terminals: number;
+  wallets: number;
+  customers: number;
+  transactions: number;
+  settlements: number;
+}
+
+interface MerchantDashboardResponse {
+  success: boolean;
+  data: MerchantDashboard;
 }
 
 export function useMerchantDashboard(id: string) {
@@ -17,12 +23,11 @@ export function useMerchantDashboard(id: string) {
     queryKey: ["merchant", id, "dashboard"],
 
     queryFn: async (): Promise<MerchantDashboard> => {
-      const response =
-        await api.get<MerchantDashboard>(
-          ENDPOINTS.merchants.dashboard(id)
-        );
+      const response = await api.get<MerchantDashboardResponse>(
+        ENDPOINTS.merchants.dashboard(id)
+      );
 
-      return response.data;
+      return response.data.data;
     },
 
     enabled: Boolean(id),

@@ -9,8 +9,24 @@ import {
 } from "lucide-react";
 
 import { MerchantTable } from "@/components/merchants/merchant-table";
+import { useMerchants } from "@/features/merchants/hooks/use-merchants";
 
 export default function MerchantsPage() {
+  const {
+    data: merchants = [],
+    isLoading,
+  } = useMerchants();
+
+  const totalMerchants = merchants.length;
+
+  const activeMerchants = merchants.filter(
+    (merchant) => merchant.status === "ACTIVE"
+  ).length;
+
+  const verifiedMerchants = merchants.filter(
+    (merchant) => merchant.isVerified
+  ).length;
+
   return (
     <div className="space-y-8">
 
@@ -42,8 +58,9 @@ export default function MerchantsPage() {
               <p className="text-sm font-medium text-slate-500">
                 Total Merchants
               </p>
+
               <p className="mt-2 text-2xl font-semibold text-slate-900">
-                —
+                {isLoading ? "..." : totalMerchants.toLocaleString()}
               </p>
             </div>
 
@@ -59,8 +76,9 @@ export default function MerchantsPage() {
               <p className="text-sm font-medium text-slate-500">
                 Active Merchants
               </p>
+
               <p className="mt-2 text-2xl font-semibold text-slate-900">
-                —
+                {isLoading ? "..." : activeMerchants.toLocaleString()}
               </p>
             </div>
 
@@ -76,8 +94,9 @@ export default function MerchantsPage() {
               <p className="text-sm font-medium text-slate-500">
                 Verified
               </p>
+
               <p className="mt-2 text-2xl font-semibold text-slate-900">
-                —
+                {isLoading ? "..." : verifiedMerchants.toLocaleString()}
               </p>
             </div>
 
@@ -93,6 +112,7 @@ export default function MerchantsPage() {
               <p className="text-sm font-medium text-slate-500">
                 Search & Filter
               </p>
+
               <p className="mt-2 text-sm font-medium text-slate-700">
                 Find a merchant
               </p>

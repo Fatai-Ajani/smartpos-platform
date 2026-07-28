@@ -37,6 +37,9 @@ export default class MetricsService {
           amount: true,
         },
         where: {
+          createdAt: {
+            gte: today,
+          },
           status: {
             in: [
               "CAPTURED",

@@ -1,0 +1,14 @@
+{
+  "name": "SmartPOS Platform",
+  "forwardPorts": [3000, 3001],
+  "portsAttributes": {
+    "3000": {
+      "label": "SmartPOS Backend API",
+      "visibility": "private"
+    },
+    "3001": {
+      "label": "SmartPOS Frontend",
+      "visibility": "private"
+    }
+  }
+}

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
-import { getTransaction } from "@/features/transactions/services/transaction-details.service";
+import { getTransaction } from "@/features/transactions/services/transaction.service";
 
 export default function TransactionDetailsPage() {
   const params = useParams<{ id: string }>();
@@ -33,6 +33,7 @@ export default function TransactionDetailsPage() {
   if (error || !transaction) {
     return (
       <div className="space-y-6">
+
         <Link
           href="/dashboard/transactions"
           className="inline-flex text-sm font-medium text-blue-600 hover:text-blue-800"
@@ -50,54 +51,125 @@ export default function TransactionDetailsPage() {
             loaded from the SmartPOS API.
           </p>
         </div>
+
       </div>
     );
   }
 
-  return (
-    <div className="space-y-6">
+  const currency = transaction.currency || "USD";
 
-      <div>
+  const formatAmount = (
+    value: number | string | null | undefined
+  ) => {
+    if (value === null || value === undefined) {
+      return "-";
+    }
+
+    const numericValue = Number(value);
+
+    if (Number.isNaN(numericValue)) {
+      return `${value} ${currency}`;
+    }
+
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 2,
+    }).format(numericValue);
+  };
+
+  const formatDate = (
+    value: string | undefined | null
+  ) => {
+    if (!value) {
+      return "-";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return "-";
+    }
+
+    return date.toLocaleString();
+  };
+
+  return (
+    <div className="space-y-8">
+
+      {/* Header */}
+
+      <div className="space-y-4">
+
         <Link
           href="/dashboard/transactions"
-          className="text-sm font-medium text-blue-600 hover:text-blue-800"
+          className="inline-flex text-sm font-medium text-blue-600 hover:text-blue-800"
         >
           ← Back to Transactions
         </Link>
 
-        <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-900">
-          Transaction Details
-        </h1>
-
-        <p className="mt-2 text-sm text-slate-600">
-          Review the full details of this payment transaction.
-        </p>
-      </div>
-
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-
-        <div className="flex flex-col gap-4 border-b border-slate-200 bg-slate-50 px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 
           <div>
-            <p className="text-sm font-medium text-slate-600">
-              Transaction Reference
+
+            <p className="text-sm font-medium text-slate-500">
+              Transaction Details
             </p>
 
-            <h2 className="mt-1 text-xl font-bold text-slate-900">
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">
               {transaction.reference ?? transaction.id}
-            </h2>
+            </h1>
+
+            <p className="mt-2 font-mono text-xs text-slate-500">
+              {transaction.id}
+            </p>
+
           </div>
 
-          <TransactionStatus status={transaction.status} />
+          <TransactionStatus
+            status={transaction.status}
+          />
 
         </div>
 
-        <div className="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-3">
+      </div>
 
-          <DetailItem
-            label="Transaction ID"
-            value={transaction.id}
-          />
+      {/* Transaction Summary */}
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+        <MetricCard
+          label="Amount"
+          value={formatAmount(transaction.amount)}
+        />
+
+        <MetricCard
+          label="Type"
+          value={transaction.type ?? "-"}
+        />
+
+        <MetricCard
+          label="Payment Method"
+          value={transaction.paymentMethod ?? "-"}
+        />
+
+        <MetricCard
+          label="Settlement"
+          value={transaction.settlementStatus ?? "-"}
+        />
+
+      </div>
+
+      {/* Transaction Information */}
+
+      <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+        <SectionHeader
+          title="Transaction Information"
+          description="Core information associated with this payment transaction."
+        />
+
+        <div className="grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
 
           <DetailItem
             label="Reference"
@@ -105,8 +177,8 @@ export default function TransactionDetailsPage() {
           />
 
           <DetailItem
-            label="Amount"
-            value={`${transaction.amount} ${transaction.currency}`}
+            label="Transaction ID"
+            value={transaction.id}
           />
 
           <DetailItem
@@ -120,29 +192,18 @@ export default function TransactionDetailsPage() {
           />
 
           <DetailItem
+            label="Amount"
+            value={formatAmount(transaction.amount)}
+          />
+
+          <DetailItem
+            label="Currency"
+            value={transaction.currency}
+          />
+
+          <DetailItem
             label="Payment Method"
             value={transaction.paymentMethod}
-          />
-
-          <DetailItem
-            label="Merchant"
-            value={transaction.merchant?.name ?? transaction.merchantId}
-          />
-
-          <DetailItem
-            label="Terminal"
-            value={
-              transaction.terminal?.serialNumber ??
-              transaction.terminalId
-            }
-          />
-
-          <DetailItem
-            label="Customer"
-            value={
-              transaction.customer?.email ??
-              transaction.customerId
-            }
           />
 
           <DetailItem
@@ -160,6 +221,147 @@ export default function TransactionDetailsPage() {
           />
 
           <DetailItem
+            label="Description"
+            value={transaction.description}
+          />
+
+          <DetailItem
+            label="Created"
+            value={formatDate(transaction.createdAt)}
+          />
+
+          <DetailItem
+            label="Updated"
+            value={formatDate(transaction.updatedAt)}
+          />
+
+        </div>
+
+      </section>
+
+      {/* Merchant & Terminal */}
+
+      <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+        <SectionHeader
+          title="Merchant & Terminal"
+          description="The merchant and terminal associated with this transaction."
+        />
+
+        <div className="grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
+
+          <DetailItem
+            label="Merchant"
+            value={
+              transaction.merchant?.name ??
+              transaction.merchantId
+            }
+          />
+
+          <DetailItem
+            label="Merchant ID"
+            value={transaction.merchantId}
+          />
+
+          <DetailItem
+            label="Terminal"
+            value={
+              transaction.terminal?.serialNumber ??
+              transaction.terminalId
+            }
+          />
+
+          <DetailItem
+            label="Terminal ID"
+            value={transaction.terminalId}
+          />
+
+          <DetailItem
+            label="Customer ID"
+            value={transaction.customerId}
+          />
+
+          <DetailItem
+            label="Wallet ID"
+            value={transaction.walletId}
+          />
+
+        </div>
+
+      </section>
+
+      {/* Settlement */}
+
+      <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+        <SectionHeader
+          title="Settlement Information"
+          description="Settlement status and settlement-related transaction values."
+        />
+
+        <div className="grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
+
+          <DetailItem
+            label="Settlement Status"
+            value={transaction.settlementStatus}
+          />
+
+          <DetailItem
+            label="Settlement Amount"
+            value={
+              transaction.settlementAmount !== null &&
+              transaction.settlementAmount !== undefined
+                ? formatAmount(transaction.settlementAmount)
+                : undefined
+            }
+          />
+
+          <DetailItem
+            label="Settlement Currency"
+            value={transaction.settlementCurrency}
+          />
+
+          <DetailItem
+            label="Settlement Date"
+            value={formatDate(transaction.settlementDate)}
+          />
+
+          <DetailItem
+            label="Fee Amount"
+            value={
+              transaction.feeAmount !== null &&
+              transaction.feeAmount !== undefined
+                ? formatAmount(transaction.feeAmount)
+                : undefined
+            }
+          />
+
+          <DetailItem
+            label="Net Amount"
+            value={
+              transaction.netAmount !== null &&
+              transaction.netAmount !== undefined
+                ? formatAmount(transaction.netAmount)
+                : undefined
+            }
+          />
+
+        </div>
+
+      </section>
+
+      {/* Gateway */}
+
+      <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+        <SectionHeader
+          title="Gateway Information"
+          description="Payment gateway and authorization information."
+        />
+
+        <div className="grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
+
+          <DetailItem
             label="Gateway Provider"
             value={transaction.gatewayProvider}
           />
@@ -170,44 +372,82 @@ export default function TransactionDetailsPage() {
           />
 
           <DetailItem
-            label="Settlement Status"
-            value={transaction.settlementStatus}
+            label="Approval Code"
+            value={transaction.approvalCode}
           />
 
           <DetailItem
-            label="Settlement Amount"
-            value={
-              transaction.settlementAmount != null
-                ? `${transaction.settlementAmount} ${
-                    transaction.settlementCurrency ??
-                    transaction.currency
-                  }`
-                : undefined
-            }
-          />
-
-          <DetailItem
-            label="Created"
-            value={formatDate(transaction.createdAt)}
-          />
-
-          <DetailItem
-            label="Updated"
-            value={
-              transaction.updatedAt
-                ? formatDate(transaction.updatedAt)
-                : undefined
-            }
-          />
-
-          <DetailItem
-            label="Description"
-            value={transaction.description}
+            label="Authorization Code"
+            value={transaction.authCode}
           />
 
         </div>
 
-      </div>
+      </section>
+
+      {/* Payment Intent */}
+
+      <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+        <SectionHeader
+          title="Payment Intent"
+          description="Payment intent associated with this transaction."
+        />
+
+        <div className="grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
+
+          <DetailItem
+            label="Payment Intent ID"
+            value={transaction.paymentIntentId}
+          />
+
+        </div>
+
+      </section>
+
+    </div>
+  );
+}
+
+function SectionHeader({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="border-b border-slate-200 px-6 py-5">
+
+      <h2 className="text-lg font-semibold text-slate-900">
+        {title}
+      </h2>
+
+      <p className="mt-1 text-sm text-slate-500">
+        {description}
+      </p>
+
+    </div>
+  );
+}
+
+function MetricCard({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+
+      <p className="text-sm font-medium text-slate-500">
+        {label}
+      </p>
+
+      <p className="mt-2 text-xl font-semibold text-slate-900">
+        {value}
+      </p>
 
     </div>
   );
@@ -221,7 +461,7 @@ function DetailItem({
   value?: string | number | null;
 }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+    <div>
 
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
         {label}
@@ -260,14 +500,4 @@ function TransactionStatus({
       {normalizedStatus}
     </span>
   );
-}
-
-function formatDate(value: string | Date) {
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return "-";
-  }
-
-  return date.toLocaleString();
 }

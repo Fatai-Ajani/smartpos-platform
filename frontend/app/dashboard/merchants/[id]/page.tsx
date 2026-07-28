@@ -4,16 +4,20 @@ import {
   BadgeCheck,
   Building2,
   CreditCard,
-  DollarSign,
+  Users,
   Wallet,
+  ArrowLeft,
+  Landmark,
 } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 import { useMerchant } from "@/features/merchants/hooks/use-merchant";
 import { useMerchantDashboard } from "@/features/merchants/hooks/use-merchant-dashboard";
 
 export default function MerchantDetailsPage() {
   const params = useParams();
+  const router = useRouter();
+
   const id = params.id as string;
 
   const {
@@ -50,20 +54,6 @@ export default function MerchantDetailsPage() {
     );
   }
 
-  const currency = merchant.currency ?? "USD";
-
-  const formatCurrency = (value: number | undefined) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 2,
-    }).format(value ?? 0);
-  };
-
-  const formatNumber = (value: number | undefined) => {
-    return new Intl.NumberFormat("en-US").format(value ?? 0);
-  };
-
   const formatDate = (value: string | undefined) => {
     if (!value) {
       return "-";
@@ -79,6 +69,15 @@ export default function MerchantDetailsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
         <div>
+          <button
+            type="button"
+            onClick={() => router.push("/dashboard/merchants")}
+            className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-slate-900"
+          >
+            <ArrowLeft size={16} />
+            Back to Merchants
+          </button>
+
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <Building2 size={16} />
             <span>Merchant Management</span>
@@ -110,33 +109,10 @@ export default function MerchantDetailsPage() {
       </div>
 
       {/* Merchant Metrics */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
 
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
-
-            <div>
-              <p className="text-sm font-medium text-slate-500">
-                Revenue
-              </p>
-
-              <p className="mt-2 text-2xl font-semibold text-slate-900">
-                {dashboardLoading
-                  ? "..."
-                  : formatCurrency(dashboard?.totalRevenue)}
-              </p>
-            </div>
-
-            <div className="rounded-xl bg-blue-50 p-3 text-blue-600">
-              <DollarSign size={21} />
-            </div>
-
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-
             <div>
               <p className="text-sm font-medium text-slate-500">
                 Transactions
@@ -145,20 +121,18 @@ export default function MerchantDetailsPage() {
               <p className="mt-2 text-2xl font-semibold text-slate-900">
                 {dashboardLoading
                   ? "..."
-                  : formatNumber(dashboard?.totalTransactions)}
+                  : dashboard?.transactions ?? 0}
               </p>
             </div>
 
             <div className="rounded-xl bg-violet-50 p-3 text-violet-600">
               <CreditCard size={21} />
             </div>
-
           </div>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
-
             <div>
               <p className="text-sm font-medium text-slate-500">
                 Active Terminals
@@ -167,36 +141,73 @@ export default function MerchantDetailsPage() {
               <p className="mt-2 text-2xl font-semibold text-slate-900">
                 {dashboardLoading
                   ? "..."
-                  : formatNumber(dashboard?.activeTerminals)}
+                  : dashboard?.terminals ?? 0}
               </p>
             </div>
 
             <div className="rounded-xl bg-emerald-50 p-3 text-emerald-600">
               <Building2 size={21} />
             </div>
-
           </div>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
-
             <div>
               <p className="text-sm font-medium text-slate-500">
-                Wallet Balance
+                Wallets
               </p>
 
               <p className="mt-2 text-2xl font-semibold text-slate-900">
                 {dashboardLoading
                   ? "..."
-                  : formatCurrency(dashboard?.walletBalance)}
+                  : dashboard?.wallets ?? 0}
               </p>
             </div>
 
             <div className="rounded-xl bg-sky-50 p-3 text-sky-600">
               <Wallet size={21} />
             </div>
+          </div>
+        </div>
 
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500">
+                Customers
+              </p>
+
+              <p className="mt-2 text-2xl font-semibold text-slate-900">
+                {dashboardLoading
+                  ? "..."
+                  : dashboard?.customers ?? 0}
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-blue-50 p-3 text-blue-600">
+              <Users size={21} />
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500">
+                Settlements
+              </p>
+
+              <p className="mt-2 text-2xl font-semibold text-slate-900">
+                {dashboardLoading
+                  ? "..."
+                  : dashboard?.settlements ?? 0}
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-amber-50 p-3 text-amber-600">
+              <Landmark size={21} />
+            </div>
           </div>
         </div>
 
@@ -259,10 +270,20 @@ export default function MerchantDetailsPage() {
 
           <div>
             <p className="text-sm font-medium text-slate-500">
+              Business Type
+            </p>
+
+            <p className="mt-1 text-sm text-slate-900">
+              {merchant.businessType ?? "-"}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm font-medium text-slate-500">
               Status
             </p>
 
-            <p className="mt-1 text-sm font-medium capitalize text-slate-900">
+            <p className="mt-1 text-sm font-medium text-slate-900">
               {merchant.status}
             </p>
           </div>
@@ -298,6 +319,77 @@ export default function MerchantDetailsPage() {
               {formatDate(merchant.createdAt)}
             </p>
           </div>
+
+        </div>
+
+      </div>
+
+      {/* Terminal Summary */}
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+        <div className="border-b border-slate-200 px-6 py-5">
+          <h2 className="text-lg font-semibold text-slate-900">
+            Terminals
+          </h2>
+
+          <p className="mt-1 text-sm text-slate-500">
+            Payment terminals assigned to this merchant.
+          </p>
+        </div>
+
+        <div className="p-6">
+
+          {merchant.terminals?.length ? (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b border-slate-200">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
+                      Serial Number
+                    </th>
+
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
+                      Manufacturer
+                    </th>
+
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
+                      Model
+                    </th>
+
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody className="divide-y divide-slate-200">
+                  {merchant.terminals.map((terminal) => (
+                    <tr key={terminal.id}>
+                      <td className="px-4 py-4 text-sm font-medium text-slate-900">
+                        {terminal.serialNumber}
+                      </td>
+
+                      <td className="px-4 py-4 text-sm text-slate-700">
+                        {terminal.manufacturer ?? "-"}
+                      </td>
+
+                      <td className="px-4 py-4 text-sm text-slate-700">
+                        {terminal.model ?? "-"}
+                      </td>
+
+                      <td className="px-4 py-4 text-sm font-medium text-slate-700">
+                        {terminal.status}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="text-sm text-slate-500">
+              No terminals assigned to this merchant.
+            </p>
+          )}
 
         </div>
 
