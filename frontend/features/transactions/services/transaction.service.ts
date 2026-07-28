@@ -13,7 +13,7 @@ export async function getTransactions(
     `/transactions?page=${page}&limit=${limit}`
   );
 
-  return data.data;
+  return data.data.items;
 }
 
 export async function getTransaction(

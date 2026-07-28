@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { api } from "@/lib/api/client";
 import { ENDPOINTS } from "@/lib/api/endpoints";
-import type { Merchant } from "./use-merchants";
+import type { Merchant } from "../types/merchant";
 
 interface MerchantResponse {
   success: boolean;

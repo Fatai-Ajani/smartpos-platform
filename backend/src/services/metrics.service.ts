@@ -1,4 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import {
+  PrismaClient,
+  TransactionStatus,
+} from "@prisma/client";
 
 export default class MetricsService {
   constructor(
@@ -6,15 +9,21 @@ export default class MetricsService {
   ) {}
 
   async getDashboardMetrics() {
-    const today = new Date();
+    const now = new Date();
 
-    today.setHours(0, 0, 0, 0);
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const endOfToday = new Date(now);
+    endOfToday.setHours(23, 59, 59, 999);
 
     const [
       totalMerchants,
       activeTerminals,
       transactionsToday,
       revenueResult,
+      transactionStatusBreakdown,
+      todayTransactions,
     ] = await Promise.all([
       this.prisma.merchant.count(),
 
@@ -27,7 +36,8 @@ export default class MetricsService {
       this.prisma.transaction.count({
         where: {
           createdAt: {
-            gte: today,
+            gte: startOfToday,
+            lte: endOfToday,
           },
         },
       }),
@@ -38,27 +48,107 @@ export default class MetricsService {
         },
         where: {
           createdAt: {
-            gte: today,
+            gte: startOfToday,
+            lte: endOfToday,
           },
           status: {
             in: [
-              "CAPTURED",
-              "SETTLED",
+              TransactionStatus.CAPTURED,
+              TransactionStatus.SETTLED,
             ],
           },
         },
       }),
+
+      this.prisma.transaction.groupBy({
+        by: ["status"],
+        _count: {
+          _all: true,
+        },
+        where: {
+          createdAt: {
+            gte: startOfToday,
+            lte: endOfToday,
+          },
+        },
+      }),
+
+      this.prisma.transaction.findMany({
+        where: {
+          createdAt: {
+            gte: startOfToday,
+            lte: endOfToday,
+          },
+        },
+        select: {
+          createdAt: true,
+        },
+        orderBy: {
+          createdAt: "asc",
+        },
+      }),
     ]);
 
+    const revenue = Number(
+      revenueResult._sum.amount ?? 0
+    );
+
+    const hourlyActivity = Array.from(
+      { length: 24 },
+      (_, hour) => ({
+        hour,
+        transactions: 0,
+      })
+    );
+
+    for (const transaction of todayTransactions) {
+      const hour = new Date(
+        transaction.createdAt
+      ).getHours();
+
+      hourlyActivity[hour].transactions += 1;
+    }
+
+    const statusBreakdown =
+      transactionStatusBreakdown.map((item) => ({
+        status: item.status,
+        count: item._count._all,
+      }));
+
+    const terminalCoverage =
+      totalMerchants > 0
+        ? Math.round(
+            (activeTerminals / totalMerchants) * 100
+          )
+        : 0;
+
     return {
-      totalMerchants,
-
-      activeTerminals,
-
+      revenue,
       transactionsToday,
+      totalMerchants,
+      activeTerminals,
+      terminalCoverage,
 
-      revenue:
-        revenueResult._sum.amount ?? 0,
+      platformActivity: {
+        date: startOfToday.toISOString(),
+        totalTransactions: transactionsToday,
+        hourly: hourlyActivity,
+      },
+
+      merchantInfrastructure: {
+        registeredMerchants: totalMerchants,
+        activeTerminals,
+        terminalCoverage,
+      },
+
+      revenueSummary: {
+        date: startOfToday.toISOString(),
+        revenue,
+        currency: "USD",
+      },
+
+      transactionStatusBreakdown:
+        statusBreakdown,
     };
   }
 }

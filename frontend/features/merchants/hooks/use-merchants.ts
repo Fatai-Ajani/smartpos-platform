@@ -4,16 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { api } from "@/lib/api/client";
 import { ENDPOINTS } from "@/lib/api/endpoints";
-
-export interface Merchant {
-  id: string;
-  name: string;
-  email?: string | null;
-  status?: string | null;
-  currency?: string | null;
-  isVerified?: boolean;
-  createdAt?: string;
-}
+import type { Merchant } from "../types/merchant";
 
 interface MerchantListResponse {
   success: boolean;
