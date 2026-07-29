@@ -2,27 +2,23 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { api } from "@/lib/api/client";
-import { ENDPOINTS } from "@/lib/api/endpoints";
-import type { Merchant } from "../types/merchant";
+import {
+  getMerchant,
+} from "../services/merchant.service";
 
-interface MerchantResponse {
-  success: boolean;
-  data: Merchant;
-}
-
-export function useMerchant(id: string) {
+export function useMerchant(
+  id: string
+) {
   return useQuery({
-    queryKey: ["merchant", id],
+    queryKey: [
+      "merchant",
+      id,
+    ],
 
-    queryFn: async (): Promise<Merchant> => {
-      const response = await api.get<MerchantResponse>(
-        ENDPOINTS.merchants.detail(id)
-      );
+    queryFn: () =>
+      getMerchant(id),
 
-      return response.data.data;
-    },
-
-    enabled: Boolean(id),
+    enabled:
+      Boolean(id),
   });
 }

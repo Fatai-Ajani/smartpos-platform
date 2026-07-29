@@ -10,7 +10,7 @@ async function start() {
 
     Number(
       process.env.PORT
-    ) || 3000;
+    ) || 4000;
 
   const HOST =
 

@@ -5,33 +5,45 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import { ENDPOINTS } from "@/lib/api/endpoints";
 
-import type { Transaction } from "@/features/transactions/types/transaction";
+import type {
+  Transaction,
+  TransactionListResponse,
+} from "@/features/transactions/types/transaction";
 
-interface TransactionListResponse {
-  success: boolean;
-  data: {
-    items: Transaction[];
-    pagination: {
-      page: number;
-      limit: number;
-      total: number;
-      pages: number;
-    };
-  };
+async function getTransactions(
+  page: number,
+  limit: number
+): Promise<TransactionListResponse["data"]> {
+  const response =
+    await api.get<TransactionListResponse>(
+      ENDPOINTS.transactions.list,
+      {
+        params: {
+          page,
+          limit,
+        },
+      }
+    );
+
+  return response.data.data;
 }
 
-async function getTransactions(): Promise<Transaction[]> {
-  const response = await api.get<TransactionListResponse>(
-    ENDPOINTS.transactions.list
-  );
-
-  return response.data.data.items;
-}
-
-export function useTransactions() {
+export function useTransactions(
+  page = 1,
+  limit = 10
+) {
   return useQuery({
-    queryKey: ["transactions"],
-    queryFn: getTransactions,
+    queryKey: [
+      "transactions",
+      page,
+      limit,
+    ],
+
+    queryFn: () =>
+      getTransactions(
+        page,
+        limit
+      ),
   });
 }
 

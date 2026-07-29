@@ -1,4 +1,5 @@
 import { api } from "@/lib/api/client";
+import { ENDPOINTS } from "@/lib/api/endpoints";
 
 import type {
   Transaction,
@@ -8,21 +9,29 @@ import type {
 export async function getTransactions(
   page = 1,
   limit = 10
-): Promise<Transaction[]> {
-  const { data } = await api.get<TransactionListResponse>(
-    `/transactions?page=${page}&limit=${limit}`
+): Promise<TransactionListResponse["data"]> {
+  const response = await api.get<TransactionListResponse>(
+    ENDPOINTS.transactions.list,
+    {
+      params: {
+        page,
+        limit,
+      },
+    }
   );
 
-  return data.data.items;
+  return response.data.data;
 }
 
 export async function getTransaction(
   id: string
 ): Promise<Transaction> {
-  const { data } = await api.get<{
+  const response = await api.get<{
     success: boolean;
     data: Transaction;
-  }>(`/transactions/${id}`);
+  }>(
+    ENDPOINTS.transactions.detail(id)
+  );
 
-  return data.data;
+  return response.data.data;
 }

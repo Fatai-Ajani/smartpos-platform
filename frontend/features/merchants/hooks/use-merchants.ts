@@ -2,34 +2,25 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { api } from "@/lib/api/client";
-import { ENDPOINTS } from "@/lib/api/endpoints";
-import type { Merchant } from "../types/merchant";
+import {
+  getMerchants,
+} from "../services/merchant.service";
 
-interface MerchantListResponse {
-  success: boolean;
-  data: {
-    items: Merchant[];
-    pagination: {
-      page: number;
-      limit: number;
-      total: number;
-      pages: number;
-    };
-  };
-}
-
-async function getMerchants(): Promise<Merchant[]> {
-  const response = await api.get<MerchantListResponse>(
-    ENDPOINTS.merchants.list
-  );
-
-  return response.data.data.items;
-}
-
-export function useMerchants() {
+export function useMerchants(
+  page = 1,
+  limit = 10
+) {
   return useQuery({
-    queryKey: ["merchants"],
-    queryFn: getMerchants,
+    queryKey: [
+      "merchants",
+      page,
+      limit,
+    ],
+
+    queryFn: () =>
+      getMerchants(
+        page,
+        limit
+      ),
   });
 }
