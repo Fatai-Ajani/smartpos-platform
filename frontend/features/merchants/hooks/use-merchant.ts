@@ -2,23 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import {
-  getMerchant,
-} from "../services/merchant.service";
+import { getMerchant } from "@/features/merchants/services/merchant.service";
 
-export function useMerchant(
-  id: string
-) {
+export function useMerchant(id: string) {
   return useQuery({
-    queryKey: [
-      "merchant",
-      id,
-    ],
-
-    queryFn: () =>
-      getMerchant(id),
-
-    enabled:
-      Boolean(id),
+    queryKey: ["merchant", id],
+    queryFn: () => getMerchant(id),
+    enabled: Boolean(id),
   });
 }

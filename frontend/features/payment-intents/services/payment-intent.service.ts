@@ -10,16 +10,15 @@ export async function getPaymentIntents(
   page = 1,
   limit = 10
 ): Promise<PaymentIntentResponse["data"]> {
-  const response =
-    await api.get<PaymentIntentResponse>(
-      ENDPOINTS.paymentIntents.list,
-      {
-        params: {
-          page,
-          limit,
-        },
-      }
-    );
+  const response = await api.get<PaymentIntentResponse>(
+    ENDPOINTS.paymentIntents.list,
+    {
+      params: {
+        page,
+        limit,
+      },
+    }
+  );
 
   return response.data.data;
 }
@@ -27,13 +26,12 @@ export async function getPaymentIntents(
 export async function getPaymentIntent(
   id: string
 ): Promise<PaymentIntent> {
-  const response =
-    await api.get<{
-      success: boolean;
-      data: PaymentIntent;
-    }>(
-      ENDPOINTS.paymentIntents.detail(id)
-    );
+  const response = await api.get<{
+    success: boolean;
+    data: PaymentIntent;
+  }>(
+    ENDPOINTS.paymentIntents.detail(id)
+  );
 
   return response.data.data;
 }

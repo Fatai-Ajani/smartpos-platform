@@ -1,21 +1,25 @@
-"use client"
+"use client";
 
 import {
   Activity,
   CreditCard,
+  RefreshCw,
   Store,
   Terminal,
   TrendingUp,
-  RefreshCw,
-} from "lucide-react"
+} from "lucide-react";
 
-import { useDashboardMetrics } from "@/features/dashboard/hooks/use-dashboard-metrics"
+import { useDashboardMetrics } from "@/features/dashboard/hooks/use-dashboard-metrics";
 
-function formatCurrency(amount: number, currency = "USD") {
+function formatCurrency(
+  amount: number,
+  currency = "USD"
+) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency,
-  }).format(amount)
+    maximumFractionDigits: 2,
+  }).format(amount);
 }
 
 function StatCard({
@@ -24,29 +28,54 @@ function StatCard({
   description,
   icon: Icon,
 }: {
-  title: string
-  value: string
-  description: string
-  icon: React.ElementType
+  title: string;
+  value: string;
+  description: string;
+  icon: React.ElementType;
 }) {
   return (
-    <div className="rounded-xl border bg-white p-5 shadow-sm">
-      <div className="flex items-center justify-between">
+    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-gray-500">{title}</p>
-          <p className="mt-2 text-2xl font-semibold text-gray-900">
+          <p className="text-sm font-medium text-slate-500">
+            {title}
+          </p>
+
+          <p className="mt-2 text-2xl font-semibold text-slate-900">
             {value}
           </p>
         </div>
 
-        <div className="rounded-lg bg-gray-100 p-3">
-          <Icon className="h-5 w-5 text-gray-700" />
+        <div className="rounded-lg bg-slate-100 p-3">
+          <Icon className="h-5 w-5 text-slate-700" />
         </div>
       </div>
 
-      <p className="mt-3 text-xs text-gray-500">{description}</p>
+      <p className="mt-3 text-xs text-slate-500">
+        {description}
+      </p>
     </div>
-  )
+  );
+}
+
+function getStatusStyles(status: string) {
+  switch (status.toUpperCase()) {
+    case "SETTLED":
+    case "SUCCESS":
+    case "COMPLETED":
+      return "border-emerald-200 bg-emerald-50 text-emerald-700";
+
+    case "PENDING":
+      return "border-amber-200 bg-amber-50 text-amber-700";
+
+    case "FAILED":
+    case "DECLINED":
+    case "CANCELLED":
+      return "border-red-200 bg-red-50 text-red-700";
+
+    default:
+      return "border-slate-200 bg-slate-100 text-slate-700";
+  }
 }
 
 export default function DashboardPage() {
@@ -56,14 +85,17 @@ export default function DashboardPage() {
     isError,
     refetch,
     isFetching,
-  } = useDashboardMetrics()
+  } = useDashboardMetrics();
 
   if (isLoading) {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold">Dashboard</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-semibold text-slate-900">
+            Dashboard
+          </h1>
+
+          <p className="mt-1 text-sm text-slate-500">
             SmartPOS Platform overview.
           </p>
         </div>
@@ -72,12 +104,12 @@ export default function DashboardPage() {
           {Array.from({ length: 4 }).map((_, index) => (
             <div
               key={index}
-              className="h-36 animate-pulse rounded-xl border bg-gray-100"
+              className="h-36 animate-pulse rounded-xl border border-slate-200 bg-slate-100"
             />
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   if (isError || !metrics) {
@@ -92,38 +124,67 @@ export default function DashboardPage() {
         </p>
 
         <button
+          type="button"
           onClick={() => refetch()}
-          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+          disabled={isFetching}
+          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <RefreshCw className="h-4 w-4" />
+          <RefreshCw
+            className={`h-4 w-4 ${
+              isFetching ? "animate-spin" : ""
+            }`}
+          />
           Try Again
         </button>
       </div>
-    )
+    );
   }
 
-  const currency = metrics.revenueSummary?.currency || "USD"
+  const currency =
+    metrics.revenueSummary?.currency || "USD";
+
+  const hourlyActivity =
+    metrics.platformActivity?.hourly ?? [];
+
+  const maxHourlyTransactions = Math.max(
+    ...hourlyActivity.map(
+      (item) => item.transactions
+    ),
+    0
+  );
+
+  const statusBreakdown =
+    metrics.transactionStatusBreakdown ?? [];
+
+  const totalStatusTransactions =
+    statusBreakdown.reduce(
+      (total, item) => total + item.count,
+      0
+    );
 
   return (
     <div className="space-y-8">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">
+          <h1 className="text-2xl font-semibold text-slate-900">
             Dashboard
           </h1>
 
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-slate-500">
             SmartPOS Platform overview.
           </p>
         </div>
 
         <button
+          type="button"
           onClick={() => refetch()}
           disabled={isFetching}
-          className="inline-flex items-center gap-2 rounded-lg border bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <RefreshCw
-            className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
+            className={`h-4 w-4 ${
+              isFetching ? "animate-spin" : ""
+            }`}
           />
           Refresh
         </button>
@@ -132,7 +193,10 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Today's Revenue"
-          value={formatCurrency(metrics.revenue, currency)}
+          value={formatCurrency(
+            metrics.revenue,
+            currency
+          )}
           description="Total settled transaction revenue today"
           icon={TrendingUp}
         />
@@ -160,16 +224,16 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-3">
-            <Activity className="h-5 w-5 text-gray-700" />
+            <Activity className="h-5 w-5 text-slate-700" />
 
             <div>
-              <h2 className="font-semibold text-gray-900">
+              <h2 className="font-semibold text-slate-900">
                 Platform Activity
               </h2>
 
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-slate-500">
                 Transactions processed today by hour.
               </p>
             </div>
@@ -177,103 +241,109 @@ export default function DashboardPage() {
 
           <div className="mt-6">
             {metrics.platformActivity?.totalTransactions === 0 ? (
-              <div className="flex min-h-48 items-center justify-center rounded-lg bg-gray-50">
-                <div className="text-center">
-                  <p className="font-medium text-gray-700">
+              <div className="flex min-h-48 items-center justify-center rounded-lg bg-slate-50 px-6 text-center">
+                <div>
+                  <p className="font-medium text-slate-700">
                     No transactions today
                   </p>
 
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-1 text-sm text-slate-500">
                     Transaction activity will appear here as payments are processed.
                   </p>
                 </div>
               </div>
             ) : (
               <div className="space-y-3">
-                {metrics.platformActivity.hourly.map((item) => (
-                  <div
-                    key={item.hour}
-                    className="flex items-center gap-3"
-                  >
-                    <span className="w-12 text-xs text-gray-500">
-                      {String(item.hour).padStart(2, "0")}:00
-                    </span>
+                {hourlyActivity.map((item) => {
+                  const width =
+                    maxHourlyTransactions > 0
+                      ? (item.transactions /
+                          maxHourlyTransactions) *
+                        100
+                      : 0;
 
-                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100">
-                      <div
-                        className="h-full rounded-full bg-gray-900"
-                        style={{
-                          width: `${Math.min(
-                            item.transactions * 10,
-                            100
-                          )}%`,
-                        }}
-                      />
+                  return (
+                    <div
+                      key={item.hour}
+                      className="flex items-center gap-3"
+                    >
+                      <span className="w-12 text-xs text-slate-500">
+                        {String(item.hour).padStart(2, "0")}:00
+                      </span>
+
+                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+                        <div
+                          className="h-full rounded-full bg-slate-900 transition-all"
+                          style={{
+                            width: `${width}%`,
+                          }}
+                        />
+                      </div>
+
+                      <span className="w-8 text-right text-xs font-medium text-slate-700">
+                        {item.transactions}
+                      </span>
                     </div>
-
-                    <span className="w-8 text-right text-xs font-medium">
-                      {item.transactions}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
         </div>
 
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div>
-            <h2 className="font-semibold text-gray-900">
+            <h2 className="font-semibold text-slate-900">
               Merchant Infrastructure
             </h2>
 
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-slate-500">
               Current platform merchant and terminal coverage.
             </p>
           </div>
 
-          <div className="mt-6 space-y-5">
-            <div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">
-                  Registered Merchants
-                </span>
+          <div className="mt-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-slate-500">
+                Registered Merchants
+              </span>
 
-                <span className="font-semibold">
-                  {metrics.merchantInfrastructure.registeredMerchants}
-                </span>
-              </div>
+              <span className="font-semibold text-slate-900">
+                {metrics.merchantInfrastructure.registeredMerchants}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-slate-500">
+                Active Terminals
+              </span>
+
+              <span className="font-semibold text-slate-900">
+                {metrics.merchantInfrastructure.activeTerminals}
+              </span>
             </div>
 
             <div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">
-                  Active Terminals
-                </span>
-
-                <span className="font-semibold">
-                  {metrics.merchantInfrastructure.activeTerminals}
-                </span>
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">
+                <span className="text-slate-500">
                   Terminal Coverage
                 </span>
 
-                <span className="font-semibold">
+                <span className="font-semibold text-slate-900">
                   {metrics.merchantInfrastructure.terminalCoverage}%
                 </span>
               </div>
 
-              <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-100">
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
                 <div
-                  className="h-full rounded-full bg-gray-900"
+                  className="h-full rounded-full bg-slate-900 transition-all"
                   style={{
                     width: `${Math.min(
-                      metrics.merchantInfrastructure.terminalCoverage,
+                      Math.max(
+                        metrics.merchantInfrastructure
+                          .terminalCoverage,
+                        0
+                      ),
                       100
                     )}%`,
                   }}
@@ -284,36 +354,100 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="rounded-xl border bg-white p-6 shadow-sm">
-        <div>
-          <h2 className="font-semibold text-gray-900">
-            Revenue Summary
-          </h2>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div>
+            <h2 className="font-semibold text-slate-900">
+              Revenue Summary
+            </h2>
 
-          <p className="text-sm text-gray-500">
-            Today&apos;s platform revenue.
-          </p>
+            <p className="text-sm text-slate-500">
+              Today&apos;s platform revenue.
+            </p>
+          </div>
+
+          <div className="mt-6 flex items-end justify-between">
+            <div>
+              <p className="text-3xl font-semibold text-slate-900">
+                {formatCurrency(
+                  metrics.revenueSummary.revenue,
+                  metrics.revenueSummary.currency
+                )}
+              </p>
+
+              <p className="mt-2 text-sm text-slate-500">
+                {metrics.revenueSummary.currency}
+              </p>
+            </div>
+
+            <div className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+              Today
+            </div>
+          </div>
         </div>
 
-        <div className="mt-6 flex items-end justify-between">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div>
-            <p className="text-3xl font-semibold text-gray-900">
-              {formatCurrency(
-                metrics.revenueSummary.revenue,
-                metrics.revenueSummary.currency
-              )}
-            </p>
+            <h2 className="font-semibold text-slate-900">
+              Transaction Status
+            </h2>
 
-            <p className="mt-2 text-sm text-gray-500">
-              {metrics.revenueSummary.currency}
+            <p className="text-sm text-slate-500">
+              Current transaction status distribution.
             </p>
           </div>
 
-          <div className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
-            Today
-          </div>
+          {statusBreakdown.length === 0 ? (
+            <div className="mt-6 flex min-h-32 items-center justify-center rounded-lg bg-slate-50 text-center">
+              <p className="text-sm text-slate-500">
+                No transaction status data available.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-6 space-y-4">
+              {statusBreakdown.map((item) => {
+                const percentage =
+                  totalStatusTransactions > 0
+                    ? (item.count /
+                        totalStatusTransactions) *
+                      100
+                    : 0;
+
+                return (
+                  <div key={item.status}>
+                    <div className="flex items-center justify-between gap-4">
+                      <span
+                        className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${getStatusStyles(
+                          item.status
+                        )}`}
+                      >
+                        {item.status}
+                      </span>
+
+                      <span className="text-sm font-semibold text-slate-900">
+                        {item.count.toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+                      <div
+                        className="h-full rounded-full bg-slate-900 transition-all"
+                        style={{
+                          width: `${percentage}%`,
+                        }}
+                      />
+                    </div>
+
+                    <p className="mt-1 text-right text-xs text-slate-500">
+                      {percentage.toFixed(1)}%
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>
-  )
+  );
 }
