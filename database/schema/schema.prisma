@@ -1627,6 +1627,7 @@ model Transaction {
   status                  TransactionStatus   @default(INITIATED)
   type                    String
   reference               String?             @unique
+  idempotencyKey          String?             @unique
   description             String?
   gatewayTransactionId    String?
   gatewayProvider         String?

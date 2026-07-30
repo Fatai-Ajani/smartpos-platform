@@ -292,9 +292,33 @@ async listTransactions(
 
     paymentIntentId?: string;
 
+    idempotencyKey?: string;
+
     metadata?: Prisma.JsonValue;
 
   }) {
+
+    if (data.idempotencyKey) {
+
+      const existingTransaction =
+        await this.app.prisma.transaction.findUnique({
+
+          where: {
+
+            idempotencyKey:
+              data.idempotencyKey
+
+          }
+
+        });
+
+      if (existingTransaction) {
+
+        return existingTransaction;
+
+      }
+
+    }
 
     const reference =
   this.generateReference();
@@ -328,6 +352,9 @@ const transaction =
         SettlementStatus.PENDING,
 
       reference,
+
+      idempotencyKey:
+        data.idempotencyKey,
 
       status:
         TransactionStatus.INITIATED,

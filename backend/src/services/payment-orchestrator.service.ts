@@ -52,6 +52,8 @@ export default class PaymentOrchestratorService {
 
     description?: string;
 
+    idempotencyKey?: string;
+
     metadata?: Prisma.JsonValue;
 
   }) {
@@ -106,6 +108,8 @@ export default class PaymentOrchestratorService {
 
     const transaction =
       await this.paymentService.createTransaction({
+
+        idempotencyKey: data.idempotencyKey,
 
         merchantId: data.merchantId,
 
