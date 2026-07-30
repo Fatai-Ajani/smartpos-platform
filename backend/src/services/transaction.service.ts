@@ -11,6 +11,7 @@ import ExchangeService from "./exchange.service.js";
 import GatewayService from "./gateway.service.js";
 import SettlementService from "./settlement.service.js";
 import BlockchainService from "./blockchain.service.js";
+import TransactionStateMachine from "./transaction-state-machine.js";
 
 export default class TransactionService {
 
@@ -23,6 +24,9 @@ export default class TransactionService {
   private settlementService: SettlementService;
 
   private blockchainService: BlockchainService;
+
+  private readonly stateMachine =
+    new TransactionStateMachine();
 
   constructor(
     private readonly app: FastifyInstance
@@ -469,17 +473,22 @@ const requestHeaders = {};
 
         });
 
+      this.stateMachine.assertTransition(
+        TransactionStatus.INITIATED,
+        TransactionStatus.AUTHORIZED
+      );
+
       await this.app.prisma.transaction.update({
 
-  where: {
-    id: transaction.id
-  },
+        where: {
+          id: transaction.id
+        },
 
-  data: {
-    status: TransactionStatus.AUTHORIZED
-  }
+        data: {
+          status: TransactionStatus.AUTHORIZED
+        }
 
-});
+      });
 
 await this.recordTransactionActivity({
 
@@ -741,6 +750,48 @@ return {
         settlement.id
       );
 
+    this.stateMachine.assertTransition(
+      TransactionStatus.CAPTURED,
+      TransactionStatus.SETTLED
+    );
+
+    await this.app.prisma.transaction.update({
+
+      where: {
+        id: data.transactionId
+      },
+
+      data: {
+
+        status:
+          TransactionStatus.SETTLED,
+
+        settlementStatus:
+          SettlementStatus.COMPLETED
+
+      }
+
+    });
+
+    await this.recordTransactionActivity({
+
+      transactionId: data.transactionId,
+
+      title: "Transaction Settled",
+
+      event: "TRANSACTION_SETTLED",
+
+      previousStatus:
+        TransactionStatus.CAPTURED,
+
+      newStatus:
+        TransactionStatus.SETTLED,
+
+      description:
+        "Settlement completed successfully."
+
+    });
+
     return {
 
       blockchainTx,
@@ -816,6 +867,11 @@ if (paymentAttempt) {
 
     }
 
+    this.stateMachine.assertTransition(
+      TransactionStatus.AUTHORIZED,
+      TransactionStatus.CAPTURED
+    );
+
     await this.app.prisma.transaction.update({
 
       where: {
@@ -827,7 +883,7 @@ if (paymentAttempt) {
       data: {
 
         status:
-          TransactionStatus.SETTLED,
+          TransactionStatus.CAPTURED,
 
         settlementStatus:
           SettlementStatus.COMPLETED
@@ -840,15 +896,15 @@ if (paymentAttempt) {
 
   transactionId,
 
-  title: "Transaction Settled",
+  title: "Transaction Captured",
 
-  event: "TRANSACTION_SETTLED",
+  event: "TRANSACTION_CAPTURED",
 
   previousStatus: TransactionStatus.AUTHORIZED,
 
-  newStatus: TransactionStatus.SETTLED,
+  newStatus: TransactionStatus.CAPTURED,
 
-  description: "Funds captured and settlement completed."
+  description: "Payment successfully captured."
 
 });
 
@@ -916,6 +972,11 @@ if (paymentAttempt) {
 
     }
 
+    this.stateMachine.assertTransition(
+      TransactionStatus.PENDING,
+      TransactionStatus.FAILED
+    );
+
     await this.app.prisma.transaction.update({
 
       where: {
@@ -978,6 +1039,11 @@ if (paymentAttempt) {
 
       });
 
+    this.stateMachine.assertTransition(
+      TransactionStatus.SETTLED,
+      TransactionStatus.REVERSED
+    );
+
     await this.app.prisma.transaction.update({
 
       where: {
@@ -1033,6 +1099,11 @@ if (paymentAttempt) {
         reason
 
       });
+
+    this.stateMachine.assertTransition(
+      TransactionStatus.AUTHORIZED,
+      TransactionStatus.VOIDED
+    );
 
     await this.app.prisma.transaction.update({
 
