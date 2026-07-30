@@ -1,58 +1,37 @@
 import { PaymentProvider } from "@prisma/client";
 
 export interface GatewaySelectionInput {
-
   merchantId: string;
-
   currency: string;
-
   amount: number;
-
   paymentMethod: string;
-
 }
 
 export default class SmartGatewaySelector {
 
   select(
-
     providers: PaymentProvider[],
-
     _input: GatewaySelectionInput
-
   ): PaymentProvider {
 
-    if (!providers.length) {
+    const active = providers
+      .filter(provider => provider.isActive)
+      .sort((a, b) => {
 
-      throw new Error(
+        if (a.priority !== b.priority) {
+          return a.priority - b.priority;
+        }
 
-        "No payment providers available."
+        return a.createdAt.getTime() - b.createdAt.getTime();
 
-      );
+      });
 
+    if (!active.length) {
+      throw new Error("No active payment provider found.");
     }
 
-    const activeProviders =
+    return active[0];
 
-      providers.filter(
-
-        provider =>
-
-          provider.isActive
-
-      );
-
-    if (!activeProviders.length) {
-
-      throw new Error(
-
-        "No active payment providers."
-
-      );
-
-    }
-
-return activeProviders[0]
   }
 
 }

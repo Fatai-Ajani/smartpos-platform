@@ -1,38 +1,75 @@
 import BaseProvider from "./base.provider.js";
 import ProviderManager from "./provider.manager.js";
+import CircuitBreaker from "./circuit-breaker.js";
+import ProviderMetricsService from "./provider-metrics.service.js";
+import ProviderScoreService from "./provider-score.service.js";
 
 export default class ProviderFailover {
 
   constructor(
-
-    private readonly manager =
-      new ProviderManager()
-
+    private readonly manager = new ProviderManager(),
+    private readonly breaker = new CircuitBreaker(),
+    private readonly metrics = new ProviderMetricsService(),
+    private readonly scorer = new ProviderScoreService()
   ) {}
 
-  getAvailableProvider(
-
-    providers: string[]
-
-  ): BaseProvider {
+  async execute<T>(
+    providers: string[],
+    callback: (provider: BaseProvider) => Promise<T>
+  ): Promise<T> {
 
     let lastError: unknown;
 
-    for (
+    const rankedProviders =
+      this.scorer.rank(providers);
 
-      const provider of providers
+    for (const providerName of rankedProviders) {
 
-    ) {
+      if (!this.breaker.canExecute(providerName)) {
+        console.warn(`[Circuit Open] ${providerName}`);
+        continue;
+      }
+
+      const started = Date.now();
 
       try {
 
-        return this.manager.getProvider(
+        const provider =
+          this.manager.getProvider(providerName);
 
-          provider
+        const result =
+          await callback(provider);
 
+        const duration =
+          Date.now() - started;
+
+        this.breaker.success(providerName);
+
+        this.metrics.record(
+          providerName,
+          true,
+          duration
         );
 
+        return result;
+
       } catch (error) {
+
+        const duration =
+          Date.now() - started;
+
+        this.breaker.failure(providerName);
+
+        this.metrics.record(
+          providerName,
+          false,
+          duration
+        );
+
+        console.warn(
+          `[Failover] ${providerName} failed`,
+          error
+        );
 
         lastError = error;
 
@@ -40,13 +77,15 @@ export default class ProviderFailover {
 
     }
 
-    throw lastError ??
-      new Error(
+    throw (
+      lastError ??
+      new Error("No payment provider succeeded.")
+    );
 
-        "No payment provider available."
+  }
 
-      );
-
+  metricsSnapshot() {
+    return this.metrics.all();
   }
 
 }

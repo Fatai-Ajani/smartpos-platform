@@ -3572,3 +3572,15 @@ model BackupHistory {
   @@index([backupId])
   @@index([createdAt(sort: Desc)])
 }
+model ProviderMetric {
+  id                  String   @id @default(cuid())
+  provider            String
+  requests            Int      @default(0)
+  successes           Int      @default(0)
+  failures            Int      @default(0)
+  averageResponseTime Float    @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([provider])
+}

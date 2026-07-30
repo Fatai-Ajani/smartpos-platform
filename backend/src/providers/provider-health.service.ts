@@ -3,69 +3,36 @@ import ProviderManager from "./provider.manager.js";
 export default class ProviderHealthService {
 
   constructor(
-
-    private readonly manager =
-
-      new ProviderManager()
-
+    private readonly manager = new ProviderManager()
   ) {}
 
-  async check(
+  async check(providerName: string) {
 
-    providerName: string
-
-  ) {
+    const started = Date.now();
 
     try {
 
       const provider =
-
-        this.manager.getProvider(
-
-          providerName
-
-        );
+        this.manager.getProvider(providerName);
 
       return {
-
-        provider:
-
-          provider.name,
-
+        provider: provider.name,
         healthy: true,
-
-        checkedAt:
-
-          new Date()
-
+        latency: Date.now() - started,
+        checkedAt: new Date()
       };
 
-    } catch (
-
-      error
-
-    ) {
+    } catch (error) {
 
       return {
-
-        provider:
-
-          providerName,
-
+        provider: providerName,
         healthy: false,
-
-        checkedAt:
-
-          new Date(),
-
+        latency: Date.now() - started,
+        checkedAt: new Date(),
         error:
-
           error instanceof Error
-
             ? error.message
-
             : "Unknown error"
-
       };
 
     }
