@@ -35,3 +35,48 @@ export async function getTransaction(
 
   return response.data.data;
 }
+
+
+/*
+|--------------------------------------------------------------------------
+| Start Transaction
+|--------------------------------------------------------------------------
+*/
+
+export async function startTransaction(
+  payload: any
+) {
+
+  const response =
+    await api.post(
+      "/transactions/start",
+      payload
+    );
+
+  return response.data.data;
+
+}
+
+/*
+|--------------------------------------------------------------------------
+| Execute Payment
+|--------------------------------------------------------------------------
+*/
+
+export async function executePayment(
+  payload: {
+    transactionId: string;
+    fromCurrency: string;
+    toCurrency: string;
+  }
+) {
+
+  const response =
+    await api.post(
+      "/transactions/execute",
+      payload
+    );
+
+  return response.data.data;
+
+}

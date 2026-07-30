@@ -10,9 +10,24 @@ export interface TransactionTerminal {
 
 export interface TransactionCustomer {
   id?: string | null;
-  firstName?: string | null;
+  firstName?: string |null;
   lastName?: string | null;
   email?: string | null;
+}
+
+export interface GatewayResponseBody {
+  approved?: boolean;
+  transactionId?: string | null;
+  paymentUrl?: string | null;
+  authorizationCode?: string | null;
+}
+
+export interface TransactionGatewayResponse {
+  responseBody?: GatewayResponseBody | null;
+}
+
+export interface TransactionGatewayRequest {
+  response?: TransactionGatewayResponse | null;
 }
 
 export interface Transaction {
@@ -37,6 +52,11 @@ export interface Transaction {
 
   gatewayTransactionId?: string | null;
   gatewayProvider?: string | null;
+
+  paymentUrl?: string | null;
+
+  authorizationCode?: string | null;
+
   approvalCode?: string | null;
   authCode?: string | null;
 
@@ -57,6 +77,8 @@ export interface Transaction {
   merchant?: TransactionMerchant | null;
   terminal?: TransactionTerminal | null;
   customer?: TransactionCustomer | null;
+
+  gatewayRequest?: TransactionGatewayRequest | null;
 }
 
 export interface TransactionListResponse {

@@ -12,6 +12,7 @@ import GatewayService from "./gateway.service.js";
 import SettlementService from "./settlement.service.js";
 import BlockchainService from "./blockchain.service.js";
 import TransactionStateMachine from "./transaction-state-machine.js";
+import ProviderManager from "../providers/provider.manager.js";
 
 export default class TransactionService {
 
@@ -27,6 +28,9 @@ export default class TransactionService {
 
   private readonly stateMachine =
     new TransactionStateMachine();
+
+  private readonly providerManager =
+    new ProviderManager();
 
   constructor(
     private readonly app: FastifyInstance
@@ -410,6 +414,11 @@ providers.sort(
 
 const provider = providers[0];
 
+const providerClient =
+  this.providerManager.getProvider(
+    provider.name
+  );
+
 const endpoint =
 
   provider.baseUrl ??
@@ -486,6 +495,58 @@ const requestHeaders = {};
 
         data: {
           status: TransactionStatus.AUTHORIZED
+        }
+
+      });
+
+      if (!transaction.reference) {
+
+        throw new Error(
+          "Transaction reference is missing."
+        );
+
+      }
+
+      const providerResponse =
+        await providerClient.createPayment({
+
+          amount:
+            Number(transaction.amount),
+
+          currency:
+            String(transaction.currency),
+
+          reference:
+            transaction.reference,
+
+          description:
+            transaction.description ?? undefined,
+
+          metadata: {
+
+            transactionId:
+              transaction.id
+
+          }
+
+        });
+
+
+
+      await this.app.prisma.transaction.update({
+
+        where: {
+          id: transaction.id
+        },
+
+        data: {
+
+          gatewayTransactionId:
+            providerResponse.transactionId ?? null,
+
+          gatewayProvider:
+            provider.name,
+
         }
 
       });
@@ -567,11 +628,9 @@ await this.recordTransactionActivity({
 
   statusCode: 200,
 
-  responseBody: {
-
-    approved: true
-
-  },
+  responseBody: JSON.parse(
+    JSON.stringify(providerResponse)
+  ),
 
   responseHeaders: {},
 
@@ -594,7 +653,23 @@ return {
 
   conversion,
 
-  quote
+  quote,
+
+  gateway: {
+
+    provider:
+      provider.name,
+
+    transactionId:
+      providerResponse.transactionId ?? null,
+
+    paymentUrl:
+      providerResponse.paymentUrl ?? null,
+
+    authorizationCode:
+      providerResponse.authorizationCode ?? null
+
+  }
 
 };
 
@@ -1414,4 +1489,6 @@ async listTransactions(
 }
 
 }
+
+
 

@@ -231,6 +231,34 @@ export default function TransactionDetailPage() {
           />
 
           <InfoItem
+            label="Gateway"
+            value={
+              transaction.gatewayProvider ??
+              "-"
+            }
+          />
+
+          <InfoItem
+            label="Gateway Transaction"
+            value={
+              transaction.gatewayTransactionId ??
+              "-"
+            }
+            mono
+          />
+
+          <InfoItem
+            label="Payment URL"
+            value={
+              transaction.gatewayRequest
+                ?.response
+                ?.responseBody
+                ?.paymentUrl ??
+              "-"
+            }
+          />
+
+          <InfoItem
             label="Created"
             value={formatDate(
               transaction.createdAt

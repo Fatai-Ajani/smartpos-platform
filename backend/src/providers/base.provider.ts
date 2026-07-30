@@ -40,6 +40,8 @@ export interface ProviderResponse {
 
   transactionId?: string;
 
+  paymentUrl?: string;
+
   authorizationCode?: string;
 
   raw?: any;

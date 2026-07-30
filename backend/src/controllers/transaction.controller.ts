@@ -34,7 +34,13 @@ export default class TransactionController {
 
   return reply.send({
     success: true,
-    data: result
+    data: {
+      transaction: result.transaction,
+      gatewayRequest: result.gatewayRequest,
+      conversion: result.conversion,
+      quote: result.quote,
+      gateway: result.gateway
+    }
   });
 
 };
