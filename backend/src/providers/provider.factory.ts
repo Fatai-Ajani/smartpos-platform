@@ -3,6 +3,7 @@ import PaystackProvider from "./paystack.provider.js";
 import FlutterwaveProvider from "./flutterwave.provider.js";
 import CoinbaseProvider from "./coinbase.provider.js";
 import BinanceProvider from "./binance.provider.js";
+import MockProvider from "./mock.provider.js";
 
 import BaseProvider from "./base.provider.js";
 
@@ -63,6 +64,10 @@ export default class ProviderFactory {
           env.BINANCE_SECRET_KEY
 
         );
+
+      case "mock":
+
+        return new MockProvider();
 
       default:
 
