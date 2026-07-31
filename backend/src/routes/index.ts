@@ -10,6 +10,7 @@ import exchangeRoutes from "./exchange.routes.js";
 import gatewayRoutes from "./gateway.routes.js";
 import settlementRoutes from "./settlement.routes.js";
 import authRoutes from "./auth.routes.js";
+import terminalRoutes from "./terminal.routes.js";
 
 export default async function registerRoutes(
   app: FastifyInstance
@@ -52,6 +53,10 @@ export default async function registerRoutes(
   });
 
   app.register(authRoutes, {
+    prefix: "/api/v1"
+  });
+
+  app.register(terminalRoutes, {
     prefix: "/api/v1"
   });
 
