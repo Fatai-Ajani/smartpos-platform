@@ -2,7 +2,6 @@ import bcrypt from "bcrypt";
 import { FastifyInstance } from "fastify";
 
 export default class AuthService {
-
   constructor(
     private readonly app: FastifyInstance
   ) {}
@@ -11,73 +10,74 @@ export default class AuthService {
     email: string,
     password: string
   ) {
-
-    const user =
-      await this.app.prisma.user.findUnique({
-
-        where: {
-
-          email
-
-        }
-
-      });
+    const user = await this.app.prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
 
     if (!user?.passwordHash) {
-
-      throw new Error("Invalid credentials.");
+      const error = new Error("Invalid credentials.");
+      (error as Error & { statusCode?: number }).statusCode = 401;
+      throw error;
     }
 
     const valid = await bcrypt.compare(
-        password,
-        user.passwordHash
-      );
+      password,
+      user.passwordHash
+    );
 
     if (!valid) {
-
-      throw new Error(
-        "Invalid credentials."
-      );
-
+      const error = new Error("Invalid credentials.");
+      (error as Error & { statusCode?: number }).statusCode = 401;
+      throw error;
     }
 
-    const token =
-      this.app.jwt.sign({
+    const accessToken = this.app.jwt.sign({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
 
-        id: user.id,
+    const {
+      passwordHash,
+      passwordResetToken,
+      passwordResetExpires,
+      emailVerifyToken,
+      emailVerifyExpires,
+      ...safeUser
+    } = user;
 
-        email: user.email,
-
-        role: user.role
-
-      });
-
-    const { passwordHash, ...safeUser } = user;
-
-return {
-
-  token,
-
-  user: safeUser
-
-};
-
+    return {
+      accessToken,
+      user: safeUser,
+    };
   }
 
   async me(
     userId: string
   ) {
-
-    return this.app.prisma.user.findUnique({
-
+    const user = await this.app.prisma.user.findUnique({
       where: {
-
-        id: userId
-
-      }
-
+        id: userId,
+      },
     });
 
-  }
+    if (!user) {
+      const error = new Error("User not found.");
+      (error as Error & { statusCode?: number }).statusCode = 404;
+      throw error;
+    }
 
+    const {
+      passwordHash,
+      passwordResetToken,
+      passwordResetExpires,
+      emailVerifyToken,
+      emailVerifyExpires,
+      ...safeUser
+    } = user;
+
+    return safeUser;
+  }
 }
