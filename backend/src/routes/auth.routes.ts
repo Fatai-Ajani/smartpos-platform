@@ -70,6 +70,23 @@ export default async function authRoutes(
 
   );
 
+  app.post(
+
+    "/auth/logout",
+
+    {
+
+      preHandler: validateBody(
+        refreshTokenSchema
+      )
+
+    },
+
+    controller.logout
+
+  );
+
+
   app.get(
 
     "/auth/me",

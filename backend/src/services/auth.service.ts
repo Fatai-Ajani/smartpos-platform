@@ -255,6 +255,57 @@ export default class AuthService {
 
   }
 
+  async logout(
+    refreshToken: string
+  ) {
+
+    const records =
+      await this.app.prisma.refreshToken.findMany({
+
+        where: {
+          revoked: false
+        }
+
+      });
+
+    for (const item of records) {
+
+      const ok =
+        await verifyRefreshToken(
+          refreshToken,
+          item.token
+        );
+
+      if (ok) {
+
+        await this.app.prisma.refreshToken.update({
+
+          where: {
+            id: item.id
+          },
+
+          data: {
+            revoked: true
+          }
+
+        });
+
+        return;
+
+      }
+
+    }
+
+    const error = new Error(
+      "Invalid refresh token."
+    );
+
+    (error as any).statusCode = 401;
+
+    throw error;
+
+  }
+
   async me(
     userId: string
   ) {
