@@ -11,10 +11,13 @@ import gatewayRoutes from "./gateway.routes.js";
 import settlementRoutes from "./settlement.routes.js";
 import authRoutes from "./auth.routes.js";
 import terminalRoutes from "./terminal.routes.js";
+import healthRoutes from "./health.routes.js";
 
 export default async function registerRoutes(
   app: FastifyInstance
 ) {
+
+  app.register(healthRoutes);
 
   app.register(paymentRoutes, {
     prefix: "/api/v1"
