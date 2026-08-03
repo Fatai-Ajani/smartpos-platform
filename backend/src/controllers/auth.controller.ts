@@ -83,6 +83,30 @@ export default class AuthController {
 
   };
 
+  logout = async (
+    request: FastifyRequest,
+    reply: FastifyReply
+  ) => {
+
+    const body =
+      request.body as any;
+
+    await this.authService.logout(
+      body.refreshToken
+    );
+
+    return reply.send({
+
+      success: true,
+
+      data: {
+        message: "Logged out successfully."
+      }
+
+    });
+
+  };
+
   me = async (
     request: FastifyRequest,
     reply: FastifyReply
