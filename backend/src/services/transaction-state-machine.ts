@@ -1,10 +1,32 @@
 import { TransactionStatus } from "@prisma/client";
 
-const transitions: Record<TransactionStatus, TransactionStatus[]> = {
+const transitions: Record<
+  TransactionStatus,
+  TransactionStatus[]
+> = {
+
+  /*
+  |--------------------------------------------------------------------------
+  | Transaction Lifecycle
+  |--------------------------------------------------------------------------
+  |
+  | INITIATED
+  |    ↓
+  | PENDING
+  |    ↓
+  | AUTHORIZED
+  |    ↓
+  | CAPTURED
+  |    ↓
+  | SETTLED
+  |
+  |--------------------------------------------------------------------------
+  */
 
   INITIATED: [
     TransactionStatus.PENDING,
-    TransactionStatus.CANCELLED
+    TransactionStatus.CANCELLED,
+    TransactionStatus.FAILED
   ],
 
   PENDING: [
@@ -30,23 +52,37 @@ const transitions: Record<TransactionStatus, TransactionStatus[]> = {
   SETTLED: [
     TransactionStatus.REFUNDED,
     TransactionStatus.PARTIAL_REFUND,
-    TransactionStatus.CHARGEBACK
+    TransactionStatus.CHARGEBACK,
+    TransactionStatus.REVERSED
   ],
 
   FAILED: [],
+
   REFUNDED: [],
+
   PARTIAL_REFUND: [],
+
   VOIDED: [],
+
   CANCELLED: [],
+
   REVERSED: [],
+
   CHARGEBACK: [],
-  DISPUTED: [],
+
+  DISPUTED: [
+    TransactionStatus.PENDING_REVIEW
+  ],
+
   PENDING_REVIEW: [
     TransactionStatus.APPROVED,
     TransactionStatus.DECLINED
   ],
+
   APPROVED: [],
+
   DECLINED: [],
+
   EXPIRED: []
 
 };
@@ -56,16 +92,16 @@ export default class TransactionStateMachine {
   canTransition(
     from: TransactionStatus,
     to: TransactionStatus
-  ) {
+  ): boolean {
 
-    return transitions[from].includes(to);
+    return transitions[from]?.includes(to) ?? false;
 
   }
 
   assertTransition(
     from: TransactionStatus,
     to: TransactionStatus
-  ) {
+  ): void {
 
     if (!this.canTransition(from, to)) {
 
