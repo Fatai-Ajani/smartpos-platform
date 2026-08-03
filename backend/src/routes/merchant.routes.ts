@@ -3,20 +3,26 @@ import { FastifyInstance } from "fastify";
 import MerchantService from "../services/merchant.service.js";
 import MerchantController from "../controllers/merchant.controller.js";
 
-import { authMiddleware } from "../middleware/auth.middleware.js";
-
 import {
   validateBody,
   validateParams,
   validateQuery
 } from "../middleware/validate.js";
 
+import { authMiddleware } from "../middleware/auth.middleware.js";
+
 import {
+
   createMerchantSchema,
+
   updateMerchantSchema,
+
   merchantIdSchema,
+
   merchantDashboardSchema,
+
   merchantListQuerySchema
+
 } from "../validators/merchant.validator.js";
 
 export default async function merchantRoutes(
@@ -34,9 +40,15 @@ export default async function merchantRoutes(
     "/merchants",
 
     {
+
       preHandler: [
-        validateBody(createMerchantSchema)
+
+        validateBody(
+          createMerchantSchema
+        )
+
       ]
+
     },
 
     controller.create
@@ -48,15 +60,15 @@ export default async function merchantRoutes(
     "/merchants",
 
     {
-      preHandler: [
 
-        authMiddleware,
+      preHandler: [
 
         validateQuery(
           merchantListQuerySchema
         )
 
       ]
+
     },
 
     controller.list
@@ -68,15 +80,15 @@ export default async function merchantRoutes(
     "/merchants/:id",
 
     {
-      preHandler: [
 
-        authMiddleware,
+      preHandler: [
 
         validateParams(
           merchantIdSchema
         )
 
       ]
+
     },
 
     controller.get
@@ -88,9 +100,8 @@ export default async function merchantRoutes(
     "/merchants/:id",
 
     {
-      preHandler: [
 
-        authMiddleware,
+      preHandler: [
 
         validateParams(
           merchantIdSchema
@@ -101,6 +112,7 @@ export default async function merchantRoutes(
         )
 
       ]
+
     },
 
     controller.update
@@ -112,15 +124,15 @@ export default async function merchantRoutes(
     "/merchants/:id",
 
     {
-      preHandler: [
 
-        authMiddleware,
+      preHandler: [
 
         validateParams(
           merchantIdSchema
         )
 
       ]
+
     },
 
     controller.delete
@@ -132,15 +144,15 @@ export default async function merchantRoutes(
     "/merchants/:merchantId/dashboard",
 
     {
-      preHandler: [
 
-        authMiddleware,
+      preHandler: [
 
         validateParams(
           merchantDashboardSchema
         )
 
       ]
+
     },
 
     controller.dashboard
