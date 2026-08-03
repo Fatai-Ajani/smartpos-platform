@@ -4,11 +4,8 @@ import {
 } from "fastify";
 
 export async function authMiddleware(
-
   request: FastifyRequest,
-
   reply: FastifyReply
-
 ) {
 
   try {
@@ -21,7 +18,11 @@ export async function authMiddleware(
 
       success: false,
 
-      message: "Unauthorized."
+      statusCode: 401,
+
+      error: "Unauthorized",
+
+      message: "Authentication required."
 
     });
 

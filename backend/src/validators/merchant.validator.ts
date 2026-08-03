@@ -3,6 +3,7 @@ import { z } from "zod";
 export const createMerchantSchema = z.object({
 
   businessName: z.string().min(2),
+
   businessType: z.string().default("GENERAL"),
 
   legalBusinessName: z.string().optional(),
@@ -25,5 +26,36 @@ export const createMerchantSchema = z.object({
 
 });
 
+export const updateMerchantSchema =
+  createMerchantSchema.partial();
+
+export const merchantIdSchema =
+  z.object({
+
+    id: z.string().min(1)
+
+  });
+
+export const merchantDashboardSchema =
+  z.object({
+
+    merchantId: z.string().min(1)
+
+  });
+
+export const merchantListQuerySchema =
+  z.object({
+
+    page:
+      z.coerce.number().int().positive().default(1),
+
+    limit:
+      z.coerce.number().int().min(1).max(100).default(10)
+
+  });
+
 export type CreateMerchantDto =
   z.infer<typeof createMerchantSchema>;
+
+export type UpdateMerchantDto =
+  z.infer<typeof updateMerchantSchema>;

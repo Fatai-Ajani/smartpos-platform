@@ -1,4 +1,4 @@
-﻿import {
+import {
   FastifyReply,
   FastifyRequest
 } from "fastify";
@@ -8,24 +8,38 @@ import AuthService from "../services/auth.service.js";
 export default class AuthController {
 
   constructor(
-
     private readonly authService: AuthService
-
   ) {}
 
-  login = async (
-
+  register = async (
     request: FastifyRequest,
-
     reply: FastifyReply
-
   ) => {
 
-    const body = request.body as any;
+    const result =
+      await this.authService.register(
+        request.body as any
+      );
 
-console.log("\n=== LOGIN BODY ===");
-console.log(body);
-console.log("==================\n");
+    return reply
+      .status(201)
+      .send({
+
+        success: true,
+
+        data: result
+
+      });
+
+  };
+
+  login = async (
+    request: FastifyRequest,
+    reply: FastifyReply
+  ) => {
+
+    const body =
+      request.body as any;
 
     const result =
       await this.authService.login(
@@ -46,21 +60,38 @@ console.log("==================\n");
 
   };
 
-  me = async (
-
+  refresh = async (
     request: FastifyRequest,
-
     reply: FastifyReply
-
   ) => {
 
-    const user =
-      request.user as any;
+    const body =
+      request.body as any;
+
+    const result =
+      await this.authService.refresh(
+        body.refreshToken
+      );
+
+    return reply.send({
+
+      success: true,
+
+      data: result
+
+    });
+
+  };
+
+  me = async (
+    request: FastifyRequest,
+    reply: FastifyReply
+  ) => {
 
     const profile =
       await this.authService.me(
 
-        user.id
+        (request.user as any).id
 
       );
 
@@ -75,4 +106,3 @@ console.log("==================\n");
   };
 
 }
-

@@ -5,27 +5,87 @@ import AuthController from "../controllers/auth.controller.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { validateBody } from "../middleware/validate.js";
-import { loginSchema } from "../validators/auth.validator.js";
+
+import {
+  loginSchema,
+  registerSchema,
+  refreshTokenSchema
+} from "../validators/auth.validator.js";
 
 export default async function authRoutes(
   app: FastifyInstance
 ) {
-  const service = new AuthService(app);
-  const controller = new AuthController(service);
+
+  const service =
+    new AuthService(app);
+
+  const controller =
+    new AuthController(service);
 
   app.post(
-    "/auth/login",
+
+    "/auth/register",
+
     {
-      preHandler: validateBody(loginSchema),
+
+      preHandler: validateBody(
+        registerSchema
+      )
+
     },
+
+    controller.register
+
+  );
+
+  app.post(
+
+    "/auth/login",
+
+    {
+
+      preHandler: validateBody(
+        loginSchema
+      )
+
+    },
+
     controller.login
+
+  );
+
+  app.post(
+
+    "/auth/refresh",
+
+    {
+
+      preHandler: validateBody(
+        refreshTokenSchema
+      )
+
+    },
+
+    controller.refresh
+
   );
 
   app.get(
+
     "/auth/me",
+
     {
-      preHandler: [authMiddleware],
+
+      preHandler: [
+
+        authMiddleware
+
+      ]
+
     },
+
     controller.me
+
   );
+
 }
