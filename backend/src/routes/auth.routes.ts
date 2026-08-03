@@ -3,44 +3,29 @@ import { FastifyInstance } from "fastify";
 import AuthService from "../services/auth.service.js";
 import AuthController from "../controllers/auth.controller.js";
 
-import {
-  authMiddleware
-} from "../middleware/auth.middleware.js";
+import { authMiddleware } from "../middleware/auth.middleware.js";
+import { validateBody } from "../middleware/validate.js";
+import { loginSchema } from "../validators/auth.validator.js";
 
 export default async function authRoutes(
   app: FastifyInstance
 ) {
-
-  const service =
-    new AuthService(app);
-
-  const controller =
-    new AuthController(service);
+  const service = new AuthService(app);
+  const controller = new AuthController(service);
 
   app.post(
-
     "/auth/login",
-
+    {
+      preHandler: validateBody(loginSchema),
+    },
     controller.login
-
   );
 
   app.get(
-
     "/auth/me",
-
     {
-
-      preHandler: [
-
-        authMiddleware
-
-      ]
-
+      preHandler: [authMiddleware],
     },
-
     controller.me
-
   );
-
 }
