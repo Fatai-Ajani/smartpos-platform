@@ -342,6 +342,8 @@ export default class TransactionService {
 
         cryptoConversion: true,
 
+        cryptoConversions: true,
+
         refunds: true,
 
         events: true,
@@ -484,6 +486,23 @@ const requestHeaders = {};
 
       this.stateMachine.assertTransition(
         TransactionStatus.INITIATED,
+        TransactionStatus.PENDING
+      );
+
+      await this.app.prisma.transaction.update({
+
+        where: {
+          id: transaction.id
+        },
+
+        data: {
+          status: TransactionStatus.PENDING
+        }
+
+      });
+
+      this.stateMachine.assertTransition(
+        TransactionStatus.PENDING,
         TransactionStatus.AUTHORIZED
       );
 
@@ -555,11 +574,27 @@ await this.recordTransactionActivity({
 
   transactionId: transaction.id,
 
+  title: "Transaction Pending",
+
+  event: "TRANSACTION_PENDING",
+
+  previousStatus: TransactionStatus.INITIATED,
+
+  newStatus: TransactionStatus.PENDING,
+
+  description: "Transaction entered pending payment processing."
+
+});
+
+await this.recordTransactionActivity({
+
+  transactionId: transaction.id,
+
   title: "Transaction Authorized",
 
   event: "TRANSACTION_AUTHORIZED",
 
-  previousStatus: TransactionStatus.INITIATED,
+  previousStatus: TransactionStatus.PENDING,
 
   newStatus: TransactionStatus.AUTHORIZED,
 
@@ -640,7 +675,8 @@ await this.recordTransactionActivity({
 
 const completedTransaction =
   await this.completeTransaction(
-    transaction.id
+    transaction.id,
+    conversion.id
   );
 
 return {
@@ -712,7 +748,10 @@ return {
 
     }
 
-    if (!transaction.cryptoConversion) {
+    const conversion =
+      transaction.cryptoConversions?.[0];
+
+    if (!conversion) {
 
       throw new Error(
         "Crypto conversion missing."
@@ -740,7 +779,7 @@ return {
             data.destinationWalletId,
 
           amount:
-            transaction.cryptoConversion
+            conversion
               .toAmount,
 
           currency:
@@ -750,7 +789,7 @@ return {
             "settlement",
 
           cryptoConversionId:
-            transaction.cryptoConversion.id
+            conversion.id
 
         });
 
@@ -777,7 +816,7 @@ return {
             data.toAddress,
 
           amount:
-            transaction.cryptoConversion
+            conversion
               .toAmount,
 
           currency:
@@ -886,7 +925,8 @@ return {
   */
 
   async completeTransaction(
-    transactionId: string
+    transactionId: string,
+    conversionId?: string
   ) {
 
     const transaction =
@@ -931,13 +971,11 @@ if (paymentAttempt) {
 
 }
 
-    if (transaction.cryptoConversion) {
+    if (conversionId) {
 
       await this.exchangeService
         .completeConversion(
-
-          transaction.cryptoConversion.id
-
+          conversionId
         );
 
     }
@@ -1036,12 +1074,15 @@ if (paymentAttempt) {
 
 }
 
-    if (transaction.cryptoConversion) {
+    const conversion =
+      transaction.cryptoConversions?.[0];
+
+    if (conversion) {
 
       await this.exchangeService
         .failConversion(
 
-          transaction.cryptoConversion.id
+          conversion.id
 
         );
 
