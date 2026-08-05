@@ -15,9 +15,7 @@ export default class AuthService {
     private readonly app: FastifyInstance
   ) {}
 
-  private async createTokens(user: any) {
-
-    const accessToken =
+  private async createTokens(user: any) {const accessToken =
       this.app.jwt.sign({
 
         id: user.id,

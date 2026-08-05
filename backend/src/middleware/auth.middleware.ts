@@ -7,8 +7,7 @@ export async function authMiddleware(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
-  try {
-    await request.jwtVerify();
+  try {await request.jwtVerify();
 
     console.log("JWT VERIFIED:", {
       user: request.user
