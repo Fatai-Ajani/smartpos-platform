@@ -1,7 +1,21 @@
 import { FastifyInstance } from "fastify";
 
 import PaymentService from "../services/payment.service.js";
+
 import PaymentController from "../controllers/payment.controller.js";
+
+import {
+  validateBody,
+  validateParams,
+  validateQuery
+} from "../middleware/validate.js";
+
+import {
+  createPaymentIntentSchema,
+  paymentIntentIdSchema,
+  paymentIntentListQuerySchema
+} from "../validators/payment.validator.js";
+
 
 export default async function paymentRoutes(
   app: FastifyInstance
@@ -13,22 +27,34 @@ export default async function paymentRoutes(
     new PaymentController(service);
 
   app.post(
-    "/payment-intents",
-    controller.createPaymentIntent
-  );
+  "/payment-intents",
+  {
+    preHandler: validateBody(createPaymentIntentSchema)
+  },
+  controller.createPaymentIntent
+);
 
   app.get(
-    "/payment-intents",
-    controller.listPaymentIntents
-  );
+  "/payment-intents",
+  {
+    preHandler: validateQuery(paymentIntentListQuerySchema)
+  },
+  controller.listPaymentIntents
+);
 
   app.get(
-    "/payment-intents/:id",
-    controller.getPaymentIntent
-  );
+  "/payment-intents/:id",
+  {
+    preHandler: validateParams(paymentIntentIdSchema)
+  },
+  controller.getPaymentIntent
+);
 
   app.patch(
-    "/payment-intents/:id/expire",
-    controller.expirePaymentIntent
-  );
+  "/payment-intents/:id/expire",
+  {
+    preHandler: validateParams(paymentIntentIdSchema)
+  },
+  controller.expirePaymentIntent
+);
 }

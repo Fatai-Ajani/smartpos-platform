@@ -9,16 +9,14 @@ import TransactionController
 import { authMiddleware }
   from "../middleware/auth.middleware.js";
 
-import { validateBody, validateParams, validateQuery }
+import { validateBody }
   from "../middleware/validate.js";
 
 import {
   StartTransactionSchema,
   ExecuteTransactionSchema,
   SettlementTransactionSchema,
-  FailTransactionSchema,
-  transactionIdSchema,
-  transactionListQuerySchema
+  FailTransactionSchema
 } from "../validators/transaction.validator.js";
 
 export default async function transactionRoutes(
@@ -133,9 +131,7 @@ export default async function transactionRoutes(
 
       preHandler: [
 
-        authMiddleware,
-
-        validateParams(transactionIdSchema)
+        authMiddleware
 
       ]
 
@@ -189,9 +185,7 @@ export default async function transactionRoutes(
 
       preHandler: [
 
-        authMiddleware,
-
-        validateQuery(transactionListQuerySchema)
+        authMiddleware
 
       ]
 
@@ -216,9 +210,7 @@ export default async function transactionRoutes(
 
       preHandler: [
 
-        authMiddleware,
-
-        validateParams(transactionIdSchema)
+        authMiddleware
 
       ]
 

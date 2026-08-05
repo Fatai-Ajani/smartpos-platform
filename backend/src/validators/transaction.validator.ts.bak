@@ -160,15 +160,6 @@ export const FailTransactionSchema = z.object({
 |--------------------------------------------------------------------------
 */
 
-export const transactionIdSchema = z.object({
-  id: z.string().min(1)
-});
-
-export const transactionListQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(10)
-});
-
 export type StartTransactionInput =
   z.infer<
     typeof StartTransactionSchema

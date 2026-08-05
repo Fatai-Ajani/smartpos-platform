@@ -16,8 +16,6 @@ export const createMerchantSchema = z.object({
 
   country: z.string(),
 
-  currency: z.string().default("USD"),
-
   state: z.string().optional(),
 
   city: z.string().optional(),

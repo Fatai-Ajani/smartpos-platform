@@ -27,8 +27,7 @@ export default class MerchantService {
             state: data.state,
             city: data.city,
             addressLine1: data.address,
-            postalCode: data.postalCode,
-            currency: data.currency ?? "USD"
+            postalCode: data.postalCode
           }
         });
 
