@@ -1,17 +1,11 @@
-"use client";
-
 import {
   Building2,
   Store,
 } from "lucide-react";
 
 import { MerchantTable } from "@/components/merchants/merchant-table";
-import { CreateMerchantDialog } from "@/components/merchants/create-merchant-dialog";
-import { useMerchantCount } from "@/features/merchants/hooks/use-merchant-count";
 
 export default function MerchantsPage() {
-  const { data: merchantCount, isLoading } = useMerchantCount();
-
   return (
     <div>
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -29,13 +23,13 @@ export default function MerchantsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 shadow-sm">
-            <Building2 size={16} className="text-blue-600" />
-            Merchant network
-          </div>
+        <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 shadow-sm">
+          <Building2
+            size={16}
+            className="text-blue-600"
+          />
 
-          <CreateMerchantDialog />
+          Merchant network
         </div>
       </div>
 
@@ -51,7 +45,9 @@ export default function MerchantsPage() {
                 Registered merchants
               </p>
 
-              <p className="mt-1 text-2xl font-bold text-slate-900">{isLoading ? "...": merchantCount ?? 0}</p>
+              <p className="mt-1 text-2xl font-bold text-slate-900">
+                —
+              </p>
             </div>
           </div>
         </div>

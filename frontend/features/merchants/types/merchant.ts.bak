@@ -107,18 +107,3 @@ export interface MerchantDetailResponse {
   success: boolean;
   data: Merchant;
 }
-
-export interface CreateMerchantDto {
-  businessName: string;
-  businessType: string;
-  legalBusinessName?: string;
-  email: string;
-  phone?: string;
-  website?: string;
-  country: string;
-  currency: string;
-  state?: string;
-  city?: string;
-  address?: string;
-  postalCode?: string;
-}

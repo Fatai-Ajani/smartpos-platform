@@ -5,7 +5,6 @@ import type {
   Merchant,
   MerchantDetailResponse,
   MerchantListResponse,
-  CreateMerchantDto,
 } from "../types/merchant";
 
 export async function getMerchants(
@@ -30,17 +29,6 @@ export async function getMerchant(
 ): Promise<Merchant> {
   const response = await api.get<MerchantDetailResponse>(
     ENDPOINTS.merchants.detail(id)
-  );
-
-  return response.data.data;
-}
-
-export async function createMerchant(
-  payload: CreateMerchantDto
-): Promise<Merchant> {
-  const response = await api.post<MerchantDetailResponse>(
-    ENDPOINTS.merchants.list,
-    payload
   );
 
   return response.data.data;
