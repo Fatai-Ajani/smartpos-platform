@@ -17,11 +17,9 @@ export function MerchantPhoneInput({
   return (
     <PhoneInput
       international
-      defaultCountry={
-        (defaultCountry as any) || undefined
-      }
+      defaultCountry={defaultCountry as never}
       value={value}
-      onChange={(v) => onChange(v ?? "")}
+      onChange={(value) => onChange(value ?? "")}
       className="rounded-lg border border-slate-300 p-2"
     />
   );
