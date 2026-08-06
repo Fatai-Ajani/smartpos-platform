@@ -53,7 +53,7 @@ export function CreateMerchantDialog() {
         New Merchant
       </DialogTrigger>
 
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="w-[95vw] max-w-5xl max-h-[90vh] overflow-y-auto">
 
         <DialogHeader>
           <DialogTitle>Create Merchant</DialogTitle>
