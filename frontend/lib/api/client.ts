@@ -19,11 +19,15 @@ export const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
 
-  console.log("REQUEST:", `${config.baseURL}${config.url}`);
+console.log("REQUEST:", `${config.baseURL}${config.url}`);
+console.log("TOKEN:", token);
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+if (token) {
+  console.log("AUTH HEADER:", `Bearer ${token}`);
+  config.headers.Authorization = `Bearer ${token}`;
+} else {
+  console.log("NO TOKEN FOUND");
+}
 
   return config;
 });

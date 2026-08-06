@@ -23,7 +23,7 @@ export function useLogin() {
       console.log("LOGIN RESPONSE:", response);
 
       setAuth(
-        response.token,
+        response.accessToken,
         response.user
       );
 
