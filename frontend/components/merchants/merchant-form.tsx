@@ -72,12 +72,24 @@ export function MerchantForm({ value, onChange }: MerchantFormProps) {
           <div>
             <Label className={labelClass}>Business Type</Label>
 
-            <Input
-              className={fieldClass}
+            <select
               value={value.businessType}
-              onChange={update("businessType")}
-              placeholder="e.g. Retail"
-            />
+              onChange={(event) =>
+                updateValue("businessType")(event.target.value)
+              }
+              className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+            >
+              <option value="GENERAL">General Business</option>
+              <option value="RETAIL">Retail</option>
+              <option value="RESTAURANT">Restaurant / Food</option>
+              <option value="GROCERY">Grocery</option>
+              <option value="PHARMACY">Pharmacy</option>
+              <option value="ELECTRONICS">Electronics</option>
+              <option value="FASHION">Fashion / Apparel</option>
+              <option value="HOSPITALITY">Hospitality</option>
+              <option value="SERVICES">Professional Services</option>
+              <option value="OTHER">Other</option>
+            </select>
           </div>
 
           <div>

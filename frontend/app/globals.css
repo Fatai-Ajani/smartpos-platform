@@ -128,3 +128,51 @@
     @apply font-sans;
   }
 }
+
+/* SmartPOS phone input */
+.PhoneInput {
+  display: flex;
+  align-items: center;
+  color: #0f172a;
+}
+
+.PhoneInputCountry {
+  display: flex;
+  align-items: center;
+  color: #0f172a;
+}
+
+.PhoneInputCountrySelect {
+  color: #0f172a;
+  background-color: #ffffff;
+}
+
+.PhoneInputCountrySelectArrow {
+  border-color: #64748b;
+  opacity: 1;
+}
+
+.PhoneInputCountryIcon {
+  flex-shrink: 0;
+}
+
+.PhoneInputInput {
+  min-width: 0;
+  flex: 1;
+  border: 0 !important;
+  background: transparent !important;
+  color: #0f172a !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.PhoneInputInput::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1;
+}
+
+.PhoneInputInput:focus {
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}

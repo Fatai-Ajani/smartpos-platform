@@ -20,7 +20,7 @@ export function MerchantPhoneInput({
       defaultCountry={defaultCountry as never}
       value={value}
       onChange={(value) => onChange(value ?? "")}
-      className="rounded-lg border border-slate-300 p-2"
+      className="PhoneInput h-11 w-full rounded-xl border border-slate-200 bg-white px-3 shadow-sm transition focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10"
     />
   );
 }
