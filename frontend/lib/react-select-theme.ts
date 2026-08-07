@@ -1,6 +1,18 @@
-import type { StylesConfig } from "react-select";
+import type {
+  GroupBase,
+  StylesConfig,
+} from "react-select";
 
-export const selectStyles: StylesConfig<any, false> = {
+export type SelectOption = {
+  value: string;
+  label: string;
+};
+
+export const selectStyles: StylesConfig<
+  SelectOption,
+  false,
+  GroupBase<SelectOption>
+> = {
   control: (base, state) => ({
     ...base,
     minHeight: 42,
@@ -44,10 +56,10 @@ export const selectStyles: StylesConfig<any, false> = {
 
   option: (base, state) => ({
     ...base,
-    backgroundColor: state.isFocused
-      ? "#eff6ff"
-      : state.isSelected
+    backgroundColor: state.isSelected
       ? "#2563eb"
+      : state.isFocused
+      ? "#eff6ff"
       : "#ffffff",
     color: state.isSelected ? "#ffffff" : "#0f172a",
     cursor: "pointer",

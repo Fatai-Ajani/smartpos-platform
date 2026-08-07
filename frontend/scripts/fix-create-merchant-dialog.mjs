@@ -1,4 +1,8 @@
-"use client";
+import fs from "node:fs";
+
+const file = "components/merchants/create-merchant-dialog.tsx";
+
+const content = `"use client";
 
 import { useState } from "react";
 
@@ -82,3 +86,8 @@ export function CreateMerchantDialog() {
     </Dialog>
   );
 }
+`;
+
+fs.writeFileSync(file, content);
+
+console.log("✓ create-merchant-dialog.tsx updated");
