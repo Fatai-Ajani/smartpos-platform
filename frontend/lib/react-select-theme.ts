@@ -6,6 +6,7 @@ import type {
 export type SelectOption = {
   value: string;
   label: string;
+  phone?: string;
 };
 
 export const selectStyles: StylesConfig<
