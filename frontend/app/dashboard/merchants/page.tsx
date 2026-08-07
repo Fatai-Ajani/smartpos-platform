@@ -1,22 +1,29 @@
 "use client";
 
+import { useState } from "react";
 import {
   Building2,
   Store,
 } from "lucide-react";
 
 import { MerchantTable } from "@/components/merchants/merchant-table";
+import { MerchantToolbar } from "@/components/merchants/merchant-toolbar";
 import { CreateMerchantDialog } from "@/components/merchants/create-merchant-dialog";
+
 import { useMerchantCount } from "@/features/merchants/hooks/use-merchant-count";
 
 export default function MerchantsPage() {
-  const { data: merchantCount, isLoading } = useMerchantCount();
+  const { data: merchantCount, isLoading } =
+    useMerchantCount();
+
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
 
   return (
-    <div>
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="space-y-6">
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <p className="mb-2 text-sm font-medium text-blue-600">
+          <p className="text-sm font-medium text-blue-600">
             SmartPOS Platform
           </p>
 
@@ -31,7 +38,10 @@ export default function MerchantsPage() {
 
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 shadow-sm">
-            <Building2 size={16} className="text-blue-600" />
+            <Building2
+              size={16}
+              className="text-blue-600"
+            />
             Merchant network
           </div>
 
@@ -39,7 +49,7 @@ export default function MerchantsPage() {
         </div>
       </div>
 
-      <div className="mb-6 grid gap-5 md:grid-cols-2">
+      <div className="grid gap-5 md:grid-cols-2">
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-blue-50 p-3 text-blue-600">
@@ -51,7 +61,9 @@ export default function MerchantsPage() {
                 Registered merchants
               </p>
 
-              <p className="mt-1 text-2xl font-bold text-slate-900">{isLoading ? "...": merchantCount ?? 0}</p>
+              <p className="mt-1 text-2xl font-bold text-slate-900">
+                {isLoading ? "..." : merchantCount ?? 0}
+              </p>
             </div>
           </div>
         </div>
@@ -75,7 +87,14 @@ export default function MerchantsPage() {
         </div>
       </div>
 
-      <MerchantTable />
+      <MerchantToolbar
+        search={search}
+        status={status}
+        onSearch={setSearch}
+        onStatus={setStatus}
+      />
+
+      <MerchantTable search={search} status={status} />
     </div>
   );
 }
