@@ -1,6 +1,7 @@
 "use client";
 
 import Select from "react-select";
+import { selectStyles } from "@/lib/react-select-theme";
 
 import { getStates } from "@/lib/location/location";
 
@@ -22,7 +23,8 @@ export function StateSelect({
 
   return (
     <Select
-      options={options}
+      
+      styles={selectStyles}options={options}
       value={
         options.find(
           (option) => option.value === value

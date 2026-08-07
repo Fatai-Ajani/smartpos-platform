@@ -1,4 +1,6 @@
-"use client";
+import fs from "node:fs";
+
+const content = String.raw`"use client";
 
 import { ChangeEvent } from "react";
 
@@ -44,6 +46,7 @@ export function MerchantForm({
 
   return (
     <div className="grid grid-cols-1 gap-5 py-2 md:grid-cols-2">
+
       <div className="md:col-span-2">
         <Label>Business Name *</Label>
         <Input
@@ -152,6 +155,15 @@ export function MerchantForm({
           onChange={update("postalCode")}
         />
       </div>
+
     </div>
   );
 }
+`;
+
+fs.writeFileSync(
+  "components/merchants/merchant-form.tsx",
+  content
+);
+
+console.log("merchant-form.tsx written");

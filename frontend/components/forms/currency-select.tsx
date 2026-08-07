@@ -1,36 +1,55 @@
 "use client";
 
 import Select from "react-select";
+import { selectStyles } from "@/lib/react-select-theme";
 
 import { countries } from "@/lib/location/location";
 
-interface Props {
-  country: string;
+const currencyMap = new Map<
+  string,
+  {
+    value: string;
+    label: string;
+  }
+>();
+
+countries.forEach((country) => {
+  if (!country.currency) return;
+
+  if (!currencyMap.has(country.currency)) {
+    currencyMap.set(country.currency, {
+      value: country.currency,
+      label: `${country.currency} (${country.name})`,
+    });
+  }
+});
+
+const options = [...currencyMap.values()].sort((a, b) =>
+  a.label.localeCompare(b.label)
+);
+
+interface CurrencySelectProps {
   value: string;
   onChange: (value: string) => void;
 }
 
 export function CurrencySelect({
-  country,
   value,
   onChange,
-}: Props) {
-  const options = countries
-    .filter((c) => !country || c.isoCode === country)
-    .map((c) => ({
-      value: c.currency || "",
-      label: `${c.currency || ""} - ${c.name}`,
-    }));
-
+}: CurrencySelectProps) {
   return (
     <Select
-      options={options}
+      
+      styles={selectStyles}options={options}
       value={
-        options.find((o) => o.value === value) ??
-        null
+        options.find(
+          (option) => option.value === value
+        ) ?? null
       }
-      onChange={(o) => onChange(o?.value ?? "")}
-      placeholder="Currency..."
+      onChange={(option) =>
+        onChange(option?.value ?? "")
+      }
+      placeholder="Select currency..."
       isSearchable
     />
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import Select from "react-select";
+import { selectStyles } from "@/lib/react-select-theme";
 import ReactCountryFlag from "react-country-flag";
 
 import { countries } from "@/lib/location/location";
@@ -22,7 +23,8 @@ export function CountrySelect({
 }: CountrySelectProps) {
   return (
     <Select
-      options={options}
+      
+      styles={selectStyles}options={options}
       placeholder="Select country..."
       value={
         options.find(

@@ -1,10 +1,11 @@
 "use client";
 
 import Select from "react-select";
+import { selectStyles } from "@/lib/react-select-theme";
 
 import { getCities } from "@/lib/location/location";
 
-interface Props {
+interface CitySelectProps {
   country: string;
   state: string;
   value: string;
@@ -16,25 +17,28 @@ export function CitySelect({
   state,
   value,
   onChange,
-}: Props) {
-  const options = getCities(country, state).map(
-    (city) => ({
-      value: city.name,
-      label: city.name,
-    })
-  );
+}: CitySelectProps) {
+  const options = getCities(country, state).map((city) => ({
+    value: city.name,
+    label: city.name,
+  }));
 
   return (
     <Select
-      options={options}
+      
+      styles={selectStyles}options={options}
       value={
-        options.find((o) => o.value === value) ??
-        null
+        options.find(
+          (option) => option.value === value
+        ) ?? null
       }
-      onChange={(o) => onChange(o?.value ?? "")}
-      placeholder="City..."
+      onChange={(option) =>
+        onChange(option?.value ?? "")
+      }
+      placeholder="Select city..."
       isDisabled={!country || !state}
       isSearchable
+      noOptionsMessage={() => "No cities found"}
     />
   );
 }
