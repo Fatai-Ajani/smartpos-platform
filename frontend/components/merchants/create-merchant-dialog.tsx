@@ -48,36 +48,52 @@ export function CreateMerchantDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-  className="inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
->
-  New Merchant
-</DialogTrigger>
+        render={
+          <Button className="h-10 rounded-xl bg-blue-600 px-5 font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md" />
+        }
+      >
+        New Merchant
+      </DialogTrigger>
 
-      <DialogContent className="w-[95vw] max-w-5xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Create Merchant</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-5xl max-h-[92vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl">
+        <div className="border-b border-slate-200 bg-gradient-to-r from-white via-white to-blue-50/70 px-6 py-6 md:px-8">
+          <DialogHeader>
+            <div className="pr-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-600">
+                Merchant onboarding
+              </p>
 
-        <MerchantForm
-          value={form}
-          onChange={setForm}
-        />
+              <DialogTitle className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
+                Create merchant
+              </DialogTitle>
 
-        <DialogFooter>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                Set up the business profile and settlement details needed to
+                activate this merchant in SmartPOS.
+              </p>
+            </div>
+          </DialogHeader>
+        </div>
+
+        <div className="px-6 py-6 md:px-8">
+          <MerchantForm value={form} onChange={setForm} />
+        </div>
+
+        <DialogFooter className="border-t border-slate-200 bg-slate-50/80 px-6 py-4 md:px-8">
           <Button
             variant="outline"
+            className="rounded-xl border-slate-200 bg-white"
             onClick={() => setOpen(false)}
           >
             Cancel
           </Button>
 
           <Button
+            className="rounded-xl bg-blue-600 px-5 font-semibold text-white hover:bg-blue-700"
             onClick={handleSubmit}
             disabled={createMerchant.isPending}
           >
-            {createMerchant.isPending
-              ? "Creating..."
-              : "Create Merchant"}
+            {createMerchant.isPending ? "Creating..." : "Create Merchant"}
           </Button>
         </DialogFooter>
       </DialogContent>
