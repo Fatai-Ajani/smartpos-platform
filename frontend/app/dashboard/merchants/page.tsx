@@ -94,7 +94,7 @@ export default function MerchantsPage() {
         onStatus={setStatus}
       />
 
-      <MerchantTable search={search} status={status} />
+      <MerchantTable />
     </div>
   );
 }
