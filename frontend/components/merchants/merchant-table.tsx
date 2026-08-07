@@ -1,24 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { Search } from "lucide-react";
+import { useMemo, useState } from "react";
+
 import { useMerchants } from "@/features/merchants/hooks/use-merchants";
 
-interface MerchantTableProps {
-  search: string;
-  status: string;
-}
-
-export function MerchantTable({
-  search,
-  status,
-}: MerchantTableProps) {
+export function MerchantTable() {
   const {
     data,
     isLoading,
     isError,
   } = useMerchants();
 
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
 
   const filteredMerchants = useMemo(() => {
     const merchants = data?.items ?? [];
@@ -28,9 +24,8 @@ export function MerchantTable({
       const status = merchant.status?.toUpperCase() ?? "";
 
       const matchesStatus =
-  !status ||
-  status === "ALL" ||
-  merchant.status?.toUpperCase() === status;
+        statusFilter === "ALL" ||
+        status === statusFilter;
 
       if (!matchesStatus) {
         return false;
@@ -57,7 +52,7 @@ export function MerchantTable({
           .includes(query)
       );
     });
-  }, [data, search, status]);
+  }, [data, search, statusFilter]);
 
   const merchants = data?.items ?? [];
 
@@ -85,7 +80,40 @@ export function MerchantTable({
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
-          
+          <input
+            type="text"
+            value={search}
+            onChange={(event) =>
+              setSearch(event.target.value)
+            }
+            placeholder="Search merchants..."
+            className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+          />
+        </div>
+
+        <select
+          value={statusFilter}
+          onChange={(event) =>
+            setStatusFilter(event.target.value)
+          }
+          className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+        >
+          <option value="ALL">
+            All Statuses
+          </option>
+
+          <option value="ACTIVE">
+            Active
+          </option>
+
+          <option value="SUSPENDED">
+            Suspended
+          </option>
+
+          <option value="INACTIVE">
+            Inactive
+          </option>
+        </select>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
