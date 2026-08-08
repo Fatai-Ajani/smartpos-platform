@@ -4,6 +4,7 @@ import {
 } from "fastify";
 
 import WebhookService from "../services/webhook.service.js";
+import { enqueueWebhook } from "../queues/webhook.producer.js";
 
 export default class WebhookController {
 
@@ -22,10 +23,18 @@ export default class WebhookController {
     const webhook =
       await this.webhookService.receiveWebhook({
 
-        webhookId:    body.webhookId,
-        event:        body.event,
-        payload:      body.payload,
-        transactionId: body.transactionId
+        webhookId:
+          body.webhookId,
+
+        event:
+          body.event,
+
+        payload:
+          body.payload,
+
+        transactionId:
+          body.transactionId
+
       });
 
     return reply.code(202).send({
@@ -46,16 +55,24 @@ export default class WebhookController {
     const { id } =
       request.params as any;
 
-    const result =
-      await this.webhookService.processWebhook(
-        id
-      );
+    const job =
+      await enqueueWebhook(id);
 
-    return reply.send({
+    return reply.code(202).send({
 
       success: true,
 
-      data: result
+      message: "Webhook queued for processing",
+
+      data: {
+
+        jobId: job.id,
+
+        webhookId: id,
+
+        status: "QUEUED"
+
+      }
 
     });
 

@@ -1,57 +1,45 @@
 import { Job, Worker } from "bullmq";
 
 import {
-
   BullConnection
-
 } from "./bullmq.queue.js";
 
 import WebhookService from "../services/webhook.service.js";
 
 export default function createWebhookWorker(
-
   webhookService: WebhookService
-
 ) {
-
   return new Worker(
-
     "webhooks",
-
-    async (
-
-      job: Job
-
-    ) => {
-
+    async (job: Job) => {
       const {
-
         webhookId
-
       } = job.data;
 
-      await webhookService.processWebhook(
+      try {
+        const result =
+          await webhookService.processWebhook(
+            webhookId
+          );
 
-        webhookId
+        await webhookService.completeWebhook(
+          webhookId
+        );
 
-      );
+        return result;
+      } catch (error) {
+        await webhookService.failWebhook(
+          webhookId,
+          error instanceof Error
+            ? error.message
+            : "Webhook processing failed."
+        );
 
-      await webhookService.completeWebhook(
-
-        webhookId
-
-      );
-
+        throw error;
+      }
     },
-
     {
-
-      connection:
-
-        BullConnection
-
+      connection: BullConnection
     }
-
   );
-
 }

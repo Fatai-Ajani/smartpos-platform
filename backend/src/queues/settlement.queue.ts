@@ -1,57 +1,39 @@
 import { Job, Worker } from "bullmq";
 
 import {
-
   BullConnection
-
 } from "./bullmq.queue.js";
 
 import SettlementService from "../services/settlement.service.js";
 
 export default function createSettlementWorker(
-
   settlementService: SettlementService
-
 ) {
-
   return new Worker(
-
     "settlements",
-
-    async (
-
-      job: Job
-
-    ) => {
-
+    async (job: Job) => {
       const {
-
         settlementId
-
       } = job.data;
 
-      await settlementService.processSettlement(
+      try {
+        await settlementService.processSettlement(
+          settlementId
+        );
 
-        settlementId
+        return await settlementService.completeSettlement(
+          settlementId
+        );
+      } catch (error) {
+        await settlementService.failSettlement(
+          settlementId
+        );
 
-      );
-
-      await settlementService.completeSettlement(
-
-        settlementId
-
-      );
-
+        throw error;
+      }
     },
-
     {
-
-      connection:
-
-        BullConnection
-
+      connection: BullConnection
     }
-
   );
-
 }

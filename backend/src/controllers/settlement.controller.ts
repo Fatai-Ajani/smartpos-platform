@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 
 import SettlementService from "../services/settlement.service.js";
+import { enqueueSettlement } from "../queues/settlement.producer.js";
 
 export default class SettlementController {
 
@@ -38,16 +39,24 @@ export default class SettlementController {
     const { id } =
       request.params as any;
 
-    const settlement =
-      await this.settlementService.processSettlement(
-        id
-      );
+    const job =
+      await enqueueSettlement(id);
 
-    return reply.send({
+    return reply.code(202).send({
 
       success: true,
 
-      data: settlement
+      message: "Settlement queued for processing",
+
+      data: {
+
+        jobId: job.id,
+
+        settlementId: id,
+
+        status: "QUEUED"
+
+      }
 
     });
 
