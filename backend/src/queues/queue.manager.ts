@@ -9,12 +9,14 @@ import WebhookService from "../services/webhook.service.js";
 import createSettlementWorker from "./settlement.queue.js";
 import createWebhookWorker from "./webhook.queue.js";
 import createNotificationWorker from "./notification.queue.js";
+import createPaymentWorker from "./payment.queue.js";
 
 export default class QueueManager {
   private settlementWorker?: Worker;
   private blockchainWorker?: Worker;
   private webhookWorker?: Worker;
   private notificationWorker?: Worker;
+private paymentWorker?: Worker;
 
   constructor(
     private readonly _paymentService: PaymentService,
@@ -70,7 +72,8 @@ export default class QueueManager {
         .map((worker) => worker.close())
     );
 
-    this.settlementWorker = undefined;
+    this.paymentWorker = undefined;
+this.settlementWorker = undefined;
     this.blockchainWorker = undefined;
     this.webhookWorker = undefined;
     this.notificationWorker = undefined;
