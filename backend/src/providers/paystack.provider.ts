@@ -9,13 +9,10 @@ import BaseProvider, {
   ProviderResponse
 } from "./base.provider.js";
 
-export default class PaystackProvider
-  extends BaseProvider
-{
+export default class PaystackProvider extends BaseProvider {
   readonly name = "paystack";
 
   private readonly client: AxiosInstance;
-
   private readonly secretKey: string;
 
   constructor(secretKey: string) {
@@ -32,10 +29,8 @@ export default class PaystackProvider
     this.client = axios.create({
       baseURL: "https://api.paystack.co",
       headers: {
-        Authorization:
-          `Bearer ${secretKey}`,
-        "Content-Type":
-          "application/json"
+        Authorization: `Bearer ${secretKey}`,
+        "Content-Type": "application/json"
       },
       timeout: 30000
     });
@@ -44,19 +39,20 @@ export default class PaystackProvider
   async createPayment(
     input: CreatePaymentInput
   ): Promise<ProviderResponse> {
-
     if (!input.customer?.email) {
       throw new Error(
         "Customer email is required for Paystack payment initialization."
       );
     }
 
-    const amount =
-      Math.round(
-        input.amount * 100
-      );
+    const amount = Math.round(
+      input.amount * 100
+    );
 
-    if (!Number.isInteger(amount) || amount <= 0) {
+    if (
+      !Number.isInteger(amount) ||
+      amount <= 0
+    ) {
       throw new Error(
         "Payment amount must be greater than zero."
       );
@@ -95,7 +91,7 @@ export default class PaystackProvider
       response.data?.data;
 
     if (
-      !response.data?.status ||
+      response.data?.status !== true ||
       !data?.authorization_url ||
       !data?.reference
     ) {
@@ -121,6 +117,9 @@ export default class PaystackProvider
       paymentUrl:
         data.authorization_url,
 
+      accessCode:
+        data.access_code,
+
       raw:
         response.data
     };
@@ -129,7 +128,6 @@ export default class PaystackProvider
   async verifyPayment(
     input: VerifyPaymentInput
   ): Promise<ProviderResponse> {
-
     const response =
       await this.client.get(
         `/transaction/verify/${encodeURIComponent(
@@ -174,7 +172,6 @@ export default class PaystackProvider
   async refundPayment(
     input: RefundPaymentInput
   ): Promise<ProviderResponse> {
-
     const payload: Record<
       string,
       unknown
@@ -219,7 +216,6 @@ export default class PaystackProvider
     payload: any,
     signature: string
   ): Promise<boolean> {
-
     const crypto =
       await import("crypto");
 

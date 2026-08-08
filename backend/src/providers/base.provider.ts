@@ -1,55 +1,39 @@
 export interface CreatePaymentInput {
-
   amount: number;
-
   currency: string;
-
   reference: string;
-
   description?: string;
-
-  customer?: any;
-
+  customer?: {
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+  };
   metadata?: Record<string, any>;
-
 }
 
 export interface RefundPaymentInput {
-
   transactionId: string;
-
   amount?: number;
-
   reason?: string;
-
 }
 
 export interface VerifyPaymentInput {
-
   transactionId: string;
-
 }
 
 export interface ProviderResponse {
-
   success: boolean;
-
   message: string;
-
   reference?: string;
-
   transactionId?: string;
-
   paymentUrl?: string;
-
+  accessCode?: string;
   authorizationCode?: string;
-
   raw?: any;
-
 }
 
 export default abstract class BaseProvider {
-
   abstract readonly name: string;
 
   abstract createPayment(
@@ -68,5 +52,4 @@ export default abstract class BaseProvider {
     payload: any,
     signature: string
   ): Promise<boolean>;
-
 }

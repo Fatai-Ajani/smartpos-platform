@@ -42,7 +42,7 @@ export default class FlutterwaveProvider extends BaseProvider {
             email:
               input.customer?.email,
             name:
-              input.customer?.name,
+              [input.customer?.firstName, input.customer?.lastName].filter(Boolean).join(" "),
             phone_number:
               input.customer?.phone
           },
