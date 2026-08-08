@@ -2,31 +2,37 @@ import { Worker } from "bullmq";
 
 import BlockchainService from "../services/blockchain.service.js";
 import createBlockchainWorker from "./blockchain.queue.js";
-import PaymentService from "../services/payment.service.js";
-import SettlementService from "../services/settlement.service.js";
-import WebhookService from "../services/webhook.service.js";
 
+import SettlementService from "../services/settlement.service.js";
 import createSettlementWorker from "./settlement.queue.js";
+
+import WebhookService from "../services/webhook.service.js";
 import createWebhookWorker from "./webhook.queue.js";
+
 import createNotificationWorker from "./notification.queue.js";
+
+import TransactionService from "../services/transaction.service.js";
 import createPaymentWorker from "./payment.queue.js";
 
 export default class QueueManager {
+
+  private paymentWorker?: Worker;
   private settlementWorker?: Worker;
   private blockchainWorker?: Worker;
   private webhookWorker?: Worker;
   private notificationWorker?: Worker;
-private paymentWorker?: Worker;
 
   constructor(
-    private readonly _paymentService: PaymentService,
+    private readonly transactionService: TransactionService,
     private readonly settlementService: SettlementService,
     private readonly blockchainService: BlockchainService,
     private readonly webhookService: WebhookService
   ) {}
 
   start() {
+
     if (
+      this.paymentWorker ||
       this.settlementWorker ||
       this.blockchainWorker ||
       this.webhookWorker ||
@@ -34,6 +40,11 @@ private paymentWorker?: Worker;
     ) {
       return;
     }
+
+    this.paymentWorker =
+      createPaymentWorker(
+        this.transactionService
+      );
 
     this.settlementWorker =
       createSettlementWorker(
@@ -55,7 +66,9 @@ private paymentWorker?: Worker;
   }
 
   async close() {
+
     const workers = [
+      this.paymentWorker,
       this.settlementWorker,
       this.blockchainWorker,
       this.webhookWorker,
@@ -67,13 +80,16 @@ private paymentWorker?: Worker;
         .filter(
           (
             worker
-          ): worker is Worker => Boolean(worker)
+          ): worker is Worker =>
+            Boolean(worker)
         )
-        .map((worker) => worker.close())
+        .map(
+          worker => worker.close()
+        )
     );
 
     this.paymentWorker = undefined;
-this.settlementWorker = undefined;
+    this.settlementWorker = undefined;
     this.blockchainWorker = undefined;
     this.webhookWorker = undefined;
     this.notificationWorker = undefined;

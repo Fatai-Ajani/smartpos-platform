@@ -4,7 +4,7 @@ import { registerPlugins } from "./plugins/index.js";
 import registerRoutes from "./routes/index.js";
 
 import BlockchainService from "./services/blockchain.service.js";
-import PaymentService from "./services/payment.service.js";
+import TransactionService from "./services/transaction.service.js";
 import SettlementService from "./services/settlement.service.js";
 import WebhookService from "./services/webhook.service.js";
 
@@ -21,10 +21,8 @@ async function buildApp() {
     registerRoutes
   );
 
-  const paymentService =
-    new PaymentService(app);
-
-  const settlementService =
+  const transactionService = new TransactionService(app);
+const settlementService =
     new SettlementService(app);
 
   const blockchainService =
@@ -35,7 +33,7 @@ async function buildApp() {
 
   const queueManager =
     new QueueManager(
-      paymentService,
+    transactionService,
       settlementService,
       blockchainService,
       webhookService
